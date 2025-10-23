@@ -432,8 +432,9 @@ void BankingWindow::setupViews() {
 #pragma region <Profile View>
     profileView = new QWidget();
     QVBoxLayout* profileLayout = new QVBoxLayout(profileView);
-    profileLayout->addWidget(new QLabel("Profile View"));
-    profileLayout->addWidget(new QLabel("Additional features will go here"));
+    profileLayout->addWidget(new QLabel("Profile Settings"));
+	QString nameLabel = QString::fromStdString(currentUser.name());    
+    profileLayout->addWidget(new QLabel(nameLabel));
     contentStack->addWidget(profileView);
 #pragma endregion
 }
