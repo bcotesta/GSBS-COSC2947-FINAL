@@ -98,18 +98,17 @@ void BankingWindow::onWithdraw() {
     ok = (dlg.exec() == QDialog::Accepted);
 
     if (ok && dlg.doubleValue() > 0) {
-		double amount = dlg.doubleValue();
+        double amount = dlg.doubleValue();
         if (amount <= currentAccount.getBalance()) {
             currentAccount.withdraw(amount);
-            updateCurrentAccountDisplay();
+            
+            // Consistent UI updates
+            updateAccountInCustomer();
+            refreshUI(); // Use centralized method
+            
             outputArea->append(QString("Withdrew $%1 from account %2")
                 .arg(amount, 0, 'f', 2)
                 .arg(QString::fromStdString(currentAccount.accountNumber())));
-            
-            // Update the account in customer's list
-            updateAccountInCustomer();
-        } else {
-            QMessageBox::warning(this, "Insufficient Funds", "Withdrawal amount exceeds current balance.");
         }
     }
 }
@@ -263,7 +262,12 @@ void BankingWindow::onNewAccount() {
         Account newAccount(newAccountNumber.toStdString(), accType);
         currentCustomer.addAccount(newAccount);
         
-        updateAccountSelector();
+        // Comprehensive UI refresh
+        refreshUI();
+        
+        // Switch to home view to show new account
+        setCurrentView(0);
+        
         outputArea->append(QString("Created new %1 account: %2").arg(selectedType, newAccountNumber));
     }
 }
@@ -354,8 +358,13 @@ void BankingWindow::setupUI() {
     navLayout->addWidget(moreButton);
     
     // Set initial view
-    currentViewIndex = 0;
-    setCurrentView(0);
+	if (currentAccount.accountNumber().empty()) { // if no accounts exist 
+        currentViewIndex = 6; // create new account screen
+    }
+    else {
+        currentViewIndex = 0;
+    }
+    setCurrentView(currentViewIndex);
 }
 
 // New method to setup individual views
@@ -437,6 +446,16 @@ void BankingWindow::setupViews() {
     profileLayout->addWidget(new QLabel(nameLabel));
     contentStack->addWidget(profileView);
 #pragma endregion
+
+#pragma region <create new account View>
+    newAccountView = new QWidget();
+    QVBoxLayout* newAccountLayout = new QVBoxLayout(newAccountView);
+    newAccountLayout->addWidget(new QLabel("Create New Account"));
+    newAccountBtn = new QPushButton("Create New Account");
+    newAccountLayout->addWidget(newAccountBtn);
+    connect(newAccountBtn, &QPushButton::clicked, this, &BankingWindow::onNewAccount);
+	contentStack->addWidget(newAccountView);
+#pragma endregion
 }
 
 void BankingWindow::setCurrentView(int index) {
@@ -464,6 +483,9 @@ void BankingWindow::setCurrentView(int index) {
                 break;
             case 5:
                 std::cout << "Showing profile view" << std::endl;
+				break;
+            case 6:
+                std::cout << "Showing new account view" << std::endl;
 				break;
             default:
                 break;
@@ -542,32 +564,20 @@ void BankingWindow::updateCurrentAccountDisplay() {
 }
 
 void BankingWindow::updateAccountInCustomer() {
-    // This is a workaround since we can't directly update the account in the customer's list
-    // In a real application, this would be handled by the database layer
     currentCustomer.removeAccount(currentAccount.accountNumber());
     currentCustomer.addAccount(currentAccount);
 }
 
-// -- setCurrentView --
-// switches the main view based on the index (for navbar)
-void setCurrentView(int index) {
-    switch (index) {
-        case 0:
-            // Show home view
-			break;
-        case 1:
-		    // Show transfers view
-			break;
-        case 2:
-            // Show bills view
-            break;
-        case 3:
-            // Show advice view
-            break;
-        case 4:
-            // Show more view
-            break;
-        default:
-			break;
+void BankingWindow::refreshUI() {
+    updateAccountSelector();
+    updateCurrentAccountDisplay();
+    
+    // Update view-specific elements based on current view
+    switch (currentViewIndex) {
+    case 0: // Home view
+        onViewBalance(); // Refresh balance display
+        break;
+	default:
+		break;
     }
 }

@@ -33,6 +33,7 @@ private:
     QWidget* adviceView;
     QWidget* moreView;
     QWidget* profileView;
+    QWidget* newAccountView;
     
     // UI Elements
     QLabel* welcomeLabel;
@@ -63,6 +64,7 @@ private slots:
 
 private:
     void setupUI();
+    void refreshUI();
     void setupViews();
     void initializeData();
     void updateAccountSelector();
