@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
             }
             
 			// user registration logic
-            registerNewUser(username.toStdString(), password.toStdString(), email.toStdString(), phone.toStdString());
+            registerNewUser(username.toStdString(), password.toStdString(), email.toStdString(), phone.toStdString(), "dummyAddress");
             QMessageBox::information(registerDialog, "Success", "User registered successfully!");
             registerDialog->accept();
         });

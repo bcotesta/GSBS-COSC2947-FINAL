@@ -25,8 +25,11 @@ databasemanager::databasemanager()
 void databasemanager::createAccount(std::string accN, std::string accT)
 {
     databasemanager d1;
-    std::string statement = "Create table if not exists account" + accN + "( accountId int not null, accountType VARCHAR(20) not NULL, Balance decimal(15,2) not null);";
-
+    statement = "Create table if not exists account" + accN + "( accountId int not null, accountType VARCHAR(20) not NULL, Balance decimal(15,2) not null);";
+    if (!stmt) {
+        std::cerr << "Database statement not initialized. Cannot execute query." << std::endl;
+        return;
+    }
     stmt->execute(statement);
     std::string statement = insert + accN;
     std::string tvs = "(" + accN + ", " + accT+ ", 0.00)";
@@ -43,23 +46,16 @@ void databasemanager::createTransactionTb(std::string accnID, std::string tID)
 
 }
 
-void databasemanager::addtoTable(std::string tab, std::string val)
-{
-    std::string statement = insert + tab + " " + values + val;
-    //create statement to execute
-
-    stmt->execute(statement);
-    //execute query - use execute() for INSERT statements
-}
 
 
 void databasemanager::addtoTable(std::string tab, std::string val)
 {
     std::string statement = insert + tab + " " + values + val;
-    //create statement to execute
-
+    if (!stmt) {
+        std::cerr << "Database statement not initialized. Cannot execute query." << std::endl;
+        return;
+    }
     stmt->execute(statement); 
-    //execute query - use execute() for INSERT statements
 }
 
 //col= columns being selected, tab = table selected, specval = specfic value(column from search you want)
