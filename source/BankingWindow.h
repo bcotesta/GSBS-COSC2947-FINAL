@@ -50,7 +50,7 @@ private:
     QTextEdit* outputArea;
 
 public:
-    BankingWindow(QWidget* parent = nullptr);
+    BankingWindow(QWidget* parent = nullptr, User user);
 
 private slots:
     void onAccountChanged();

@@ -16,9 +16,9 @@
 
 #include <iostream>
 
-BankingWindow::BankingWindow(QWidget* parent) : QWidget(parent),
-    // eventually pull this data from database
-    currentUser(1, "John Doe", "jd@gmail.com", "reallygoodpassword123", "705-671-7171"),
+BankingWindow::BankingWindow(QWidget* parent, User user) : QWidget(parent),
+    // eventually pull this data from database, passed in to the main
+    currentUser(user),
     currentCustomer(1),
     currentAccount("123456789", AccountType::CHEQUING)
 {
@@ -374,13 +374,13 @@ void BankingWindow::setupViews() {
     QVBoxLayout* homeLayout = new QVBoxLayout(homeView);
     
     welcomeLabel = new QLabel("Welcome!");
-    currentAccountLabel = new QLabel("Account: ");
-    balanceLabel = new QLabel("Balance: $0.00");
+    /*currentAccountLabel = new QLabel("Account: ");
+    balanceLabel = new QLabel("Balance: $0.00");*/
     accountSelector = new QComboBox();
     
     homeLayout->addWidget(welcomeLabel);
-    homeLayout->addWidget(currentAccountLabel);
-    homeLayout->addWidget(balanceLabel);
+    //homeLayout->addWidget(currentAccountLabel);
+    //homeLayout->addWidget(balanceLabel);
     homeLayout->addWidget(accountSelector);
     
     viewBalanceBtn = new QPushButton("View Balance");

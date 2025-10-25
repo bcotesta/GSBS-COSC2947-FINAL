@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     showPasswordButton->show();
 
     // Banking window (initially hidden)
-    BankingWindow* bankingWindow = new BankingWindow();
+    BankingWindow* bankingWindow;
 
     // Login button
     QPushButton *loginButton = new QPushButton("Login", &loginWindow);
@@ -119,6 +119,9 @@ int main(int argc, char *argv[])
         string pword = Qpassword.toStdString();
         if(auth.verifyCredentials(uname, pword)){
             // Close login panel and show banking window
+			// Here i would pass info for login from authenticator class to the banking window
+            /*bankingWindow = new BankingWindow(nullptr, User(auth.,));*/
+
             loginWindow.close();
             bankingWindow->show();
         }
@@ -231,8 +234,8 @@ int main(int argc, char *argv[])
     registerButton->show();
 
     // -- DEBUGGING --
-    loginWindow.close();
-    bankingWindow->show();
+    /*loginWindow.close();
+    bankingWindow->show();*/
 
     return app.exec();
 }
