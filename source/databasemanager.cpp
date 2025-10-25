@@ -1,11 +1,18 @@
 //Everest Ashley SID: 0457240
 // REFACTOR Brandon Cotesta 10/20/2025
 #include "databasemanager.h"
+#include <mysql/jdbc.h>
+#include <jdbc/mysql_driver.h>
+#include <jdbc/mysql_connection.h>
+#include <jdbc/cppconn/resultset.h>
+#include <jdbc/cppconn/statement.h>
+#include <string>
 #include <iostream>
 
 databasemanager::databasemanager()
 {
-    sql::mysql::MySQL_Driver* driver;
+    
+   /* sql::mysql::MySQL_Driver* driver;
     sql::Connection* con;
 
     try {
@@ -16,7 +23,7 @@ databasemanager::databasemanager()
     }
     catch (sql::SQLException& e) {
         std::cerr << "SQL Error: " << e.what() << std::endl;
-    }
+    } */
 }
 
 
@@ -26,18 +33,22 @@ void databasemanager::createAccount(std::string accN, std::string accT)
     sql::mysql::MySQL_Driver* driver;
     sql::Connection* con;
 
+    std::string host = "tcp://localhost:3306";
+
     try {
         driver = sql::mysql::get_driver_instance();
         con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
         con->setSchema("bankdatabase");
+        cout << "connected";
+
         sql::Statement* stmt = con->createStatement();
 
 
         std::string statement = "Create table if not exists account" + accN + "( accountId int not null, accountType VARCHAR(20) not NULL, Balance decimal(15,2) not null);";
 
-        stmt->executeQuery(statement);
+        stmt->execute(statement);
         //std::string statement2 = insert + accN;
-        std::string tvs = "(" + accN + ", " + accT + ", 0.00)";
+        std::string tvs = "('" + accN + "', '" + accT + "', 0.00)";
         addtoTable("account" + accN, tvs);
     }
     catch (sql::SQLException& e) {
@@ -55,6 +66,7 @@ void databasemanager::createTransactionTb(std::string accnID, std::string tID)
         driver = sql::mysql::get_driver_instance();
         con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
         con->setSchema("bankdatabase");
+        cout << "connected";
         sql::Statement* stmt = con->createStatement();
 
 
@@ -71,11 +83,13 @@ void databasemanager::addtoTable(std::string tab, std::string val)
 {
     sql::mysql::MySQL_Driver* driver;
     sql::Connection* con;
+ 
 
     try {
         driver = sql::mysql::get_driver_instance();
         con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
         con->setSchema("bankdatabase");
+        cout << "connected";
         sql::Statement* stmt = con->createStatement();
 
         std::string statement = insert + tab + " " + values + val;
@@ -104,6 +118,7 @@ sql::SQLString databasemanager::retString(std::string col, std::string tab, std:
         driver = sql::mysql::get_driver_instance();
         con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
         con->setSchema("bankdatabase");
+        cout << "connected";
         sql::Statement* stmt = con->createStatement();
 
 
@@ -127,6 +142,7 @@ sql::SQLString databasemanager::retString(std::string col, std::string tab, std:
     catch (sql::SQLException& e) {
         std::cerr << "SQL Error: " << e.what() << std::endl;
     }
+    
  
 }
 
@@ -153,14 +169,28 @@ sql::SQLString databasemanager::retStringW(std::string col, std::string tab, std
 // tab = table, setv = set values, cond = condition
 void databasemanager::updateTable(std::string tab, std::string setv, std::string cond)
 {
-    statement = update + tab + " " + set + setv + " " + where + cond; 
-    //create statement for execution with UPDATE, SET, and WHERE
-    //example UPDATE userinfo SET email = 'testemail' name = 'testname' WHERE userID = 1;
-    //will update values for userID 1
-    
-    stmt->execute(statement);
-    //Executes statement - use execute() for UPDATE statements
-    //no return needed
+    sql::mysql::MySQL_Driver* driver;
+    sql::Connection* con;
+
+    try {
+        driver = sql::mysql::get_driver_instance();
+        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
+        con->setSchema("bankdatabase");
+        cout << "connected";
+        sql::Statement* stmt = con->createStatement();
+
+        statement = update + tab + " " + set + setv + " " + where + cond;
+        //create statement for execution with UPDATE, SET, and WHERE
+        //example UPDATE userinfo SET email = 'testemail' name = 'testname' WHERE userID = 1;
+        //will update values for userID 1
+
+        stmt->execute(statement);
+        //Executes statement - use execute() for UPDATE statements
+        //no return needed
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error: " << e.what() << std::endl;
+    }
 }
 
 databasemanager::~databasemanager()
@@ -174,3 +204,4 @@ databasemanager::~databasemanager()
         connection = nullptr;
     }
 }
+

@@ -65,6 +65,7 @@ void registerNewUser(string user, string pass, string email, string phone) {
 
 int main(int argc, char *argv[])
 {
+
     QApplication app(argc, argv);
     
     // Authenticator
