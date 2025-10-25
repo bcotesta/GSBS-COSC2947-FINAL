@@ -40,6 +40,8 @@ public:
 	// ex string state = update + t + set + setv + where + cond + ";"
 
 private:
+	sql::mysql::MySQL_Driver* driver;
+
 	std::string statement;
 	/*std::string userinfo; // tables for easier sql queries
 	std::string accountinfo;

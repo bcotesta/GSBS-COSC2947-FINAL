@@ -4,42 +4,54 @@
 #include <iostream>
 
 databasemanager::databasemanager()
+    : driver(nullptr), connection(nullptr), stmt(nullptr)
 {
-    sql::mysql::MySQL_Driver* driver;
-    stmt = nullptr;
-    connection = nullptr;
-
     try {
         driver = sql::mysql::get_driver_instance();
+        std::cout << "Driver pointer: " << driver << std::endl;
+        if (!driver) {
+            std::cerr << "ERROR: get_driver_instance() returned null.\n";
+            return;
+        }
 
-        string host = "136.114.146.175";
-		string user = "root";
-		string password = "gsbsTeam20$";
-		string db = "bankdatabase";
+        std::string url = "tcp://136.114.146.175:3306";
+        std::string user = "root";
+        std::string password = "gsbsTeam20$";
+        std::string db = "bankdatabase";
 
-		string url = "tcp://" + host + ":3306";
-        // connect to db
         connection = driver->connect(url, user, password);
-        connection->setSchema("bankdb");
+        std::cout << "Connection pointer after connect: " << connection << std::endl;
+        if (!connection) {
+            std::cerr << "ERROR: connect() returned null.\n";
+            return;
+        }
+
+        connection->setSchema(db);
         stmt = connection->createStatement();
+        std::cout << "Statement pointer after createStatement: " << stmt << std::endl;
     }
     catch (sql::SQLException& e) {
-        std::cerr << "SQL Error: " << e.what() << std::endl;
+        std::cerr << "[SQL EXCEPTION] " << e.what() << " (code " << e.getErrorCode()
+            << ", state " << e.getSQLState() << ")\n";
+    }
+    catch (std::exception& e) {
+        std::cerr << "[STD EXCEPTION] " << e.what() << "\n";
     }
 }
+
+
 
 
 //accn = account number, accT = account type
 void databasemanager::createAccount(std::string accN, std::string accT)
 {
-    databasemanager d1;
     statement = "Create table if not exists account" + accN + "( accountId int not null, accountType VARCHAR(20) not NULL, Balance decimal(15,2) not null);";
     if (!stmt) {
         std::cerr << "Database statement not initialized. Cannot execute query." << std::endl;
         return;
     }
     stmt->execute(statement);
-    std::string statement = insert + accN;
+    statement = insert + accN;
     std::string tvs = "(" + accN + ", " + accT+ ", 0.00)";
     addtoTable("account"+accN, tvs);
     
