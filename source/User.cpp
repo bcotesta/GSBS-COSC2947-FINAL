@@ -1,16 +1,15 @@
 // Brandon Cotesta 10/08/2025
 #include "User.h"
 #include "databasemanager.h"
-#include "databasemanager.cpp"
 
 #include <iostream>
 
-User::User(string n, string e, string p, string ph, string add): 
-	name_(n), email_(e), passwordHash_(p), phone_(ph), address_(add)
+User::User(string n, string e, string p, string ph): 
+	name_(n), email_(e), passwordHash_(p), phone_(ph)
 {
 	databasemanager d1;
 	std::string tb = "userinfo";
-	std::string ts = "(" + n + ", " + e + ", " + p + ", " + ph + ", " + add + ")";
+	std::string ts = "(" + n + ", " + e + ", " + p + ", " + ph + ")";
 	d1.addtoTable(tb, ts);
 	// create user
 }

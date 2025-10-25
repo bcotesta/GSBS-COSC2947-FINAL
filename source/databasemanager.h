@@ -29,10 +29,10 @@ public:
 	// (t) table to add a row to, (v) values to insert in ('value1','value2') format 
 	// or "('"+ name + "', '" + email + "')" format with variables
 
-	std::string retString(std::string col, std::string tab, std::string specval);
+	sql::SQLString retString(std::string col, std::string tab, std::string specval);
 	// select statement without where statement
   
-	std::string retStringW(std::string col, std::string tab, std::string val, std::string specval);
+	sql::SQLString retStringW(std::string col, std::string tab, std::string val, std::string specval);
 	// (c)column/s to select, (t)table to select from, (v)value to select if using where 
 	// ex select + c + from + t + where + v + ";";
 

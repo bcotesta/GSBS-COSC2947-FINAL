@@ -58,9 +58,9 @@ string switchAccount(Customer& customer) {
     return it->accountNumber();
 }
 
-void registerNewUser(string user, string pass, string email, string phone, string add) {
+void registerNewUser(string user, string pass, string email, string phone) {
 	int id = 2; // This would be generated or retrieved from a database. 
-    User newUser(user, pass, email, phone, add); // creates a new user with given info
+    User newUser(user, pass, email, phone); // creates a new user with given info
 }
 
 int main(int argc, char *argv[])

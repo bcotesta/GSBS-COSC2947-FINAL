@@ -12,7 +12,7 @@ Authenticator::Authenticator() {
 	//      store them in a suitable data structure
 	//}
 
-	databasemanager d1;
+	//databasemanager d1;
 	
 	//d1.retString();
 	
@@ -31,12 +31,12 @@ void Authenticator::setValidInfo(std::string username, std::string password)
 	std::string tempcol2 = "password";
 	std::string tempcol3 = "name";
 	std::string tempcol4 = "phone";
-	std::string tempcol5 = "address";
-	std::string tempcol6 = "userID";
+	std::string tempcol5 = "userID";
 
 	std::string tempemail = "email = '" + username+ "';";
 	std::string temppass = "password = '" + password + "';";
 
+	validUserID_ = d1.retStringW(tempcol, "userinfo", tempemail, tempcol5);
 	validName_ = d1.retStringW(tempcol, "userinfo", tempemail, tempcol3);
 	validUsername_ = d1.retStringW(tempcol, "userinfo", tempemail, tempcol);
 	validPhone_ = d1.retStringW(tempcol, "userinfo", tempemail, tempcol4);
@@ -52,7 +52,7 @@ void Authenticator::resetPassword(const string& username)
 {
 	// In a real application, this would involve more secure steps
 	if (username == validUsername) {
-		cout << "Password reset link has been sent to your registered email." << endl;
+		//cout << "Password reset link has been sent to your registered email." << endl;
 	} else {
 		cout << "Username not found." << endl;
 	}

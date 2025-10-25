@@ -20,12 +20,16 @@ Account::Account(string accountNumber, AccountType accType)
     {
     case AccountType::CHEQUING:
         accT = "CHEQUING";
+        break;
     case AccountType::SAVINGS:
         accT = "SAVINGS";
+        break;
     case AccountType::CREDIT:
         accT = "CREDIT";
+        break;
     case AccountType::LOAN:
         accT = "LOAN";
+        break;
     }
 
 

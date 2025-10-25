@@ -4,7 +4,7 @@ using namespace std;
 class User
 {
 public:
-	User(string n, string e, string p, string ph, string add); // since the database generates an id number when an account is created we wont need to establish it here
+	User(string n, string e, string p, string ph); // since the database generates an id number when an account is created we wont need to establish it here
 
 	int userId() const;
 	string name() const;

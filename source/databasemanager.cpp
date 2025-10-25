@@ -6,14 +6,13 @@
 databasemanager::databasemanager()
 {
     sql::mysql::MySQL_Driver* driver;
-    stmt = nullptr;
-    connection = nullptr;
+    sql::Connection* con;
 
     try {
         driver = sql::mysql::get_driver_instance();
-        connection = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
-        connection->setSchema("bankdatabase");
-        stmt = connection->createStatement();
+        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
+        con->setSchema("bankdatabase");
+        sql::Statement* stmt = con->createStatement();
     }
     catch (sql::SQLException& e) {
         std::cerr << "SQL Error: " << e.what() << std::endl;
@@ -24,69 +23,115 @@ databasemanager::databasemanager()
 //accn = account number, accT = account type
 void databasemanager::createAccount(std::string accN, std::string accT)
 {
-    databasemanager d1;
-    std::string statement = "Create table if not exists account" + accN + "( accountId int not null, accountType VARCHAR(20) not NULL, Balance decimal(15,2) not null);";
+    sql::mysql::MySQL_Driver* driver;
+    sql::Connection* con;
 
-    stmt->execute(statement);
-    std::string statement = insert + accN;
-    std::string tvs = "(" + accN + ", " + accT+ ", 0.00)";
-    addtoTable("account"+accN, tvs);
-    
+    try {
+        driver = sql::mysql::get_driver_instance();
+        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
+        con->setSchema("bankdatabase");
+        sql::Statement* stmt = con->createStatement();
+
+
+        std::string statement = "Create table if not exists account" + accN + "( accountId int not null, accountType VARCHAR(20) not NULL, Balance decimal(15,2) not null);";
+
+        stmt->executeQuery(statement);
+        //std::string statement2 = insert + accN;
+        std::string tvs = "(" + accN + ", " + accT + ", 0.00)";
+        addtoTable("account" + accN, tvs);
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error: " << e.what() << std::endl;
+    }
 
 
 }
 
 void databasemanager::createTransactionTb(std::string accnID, std::string tID)
 {
-    std::string statement = ctable + "Transaction " + tID + " (TransactionID int primary key, accountId INT not null, accounttype VARCHAR(20) not null, transactiontype VARCHAR(20) not null, amount decimal(15,2) not null, transactiondate DATETIME not null, description VARCHAR(255));";
-    stmt->execute(statement);
-
-}
-
-void databasemanager::addtoTable(std::string tab, std::string val)
-{
-    std::string statement = insert + tab + " " + values + val;
-    //create statement to execute
-
-    stmt->execute(statement);
-    //execute query - use execute() for INSERT statements
-}
+    sql::mysql::MySQL_Driver* driver;
+    sql::Connection* con;
+    try {
+        driver = sql::mysql::get_driver_instance();
+        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
+        con->setSchema("bankdatabase");
+        sql::Statement* stmt = con->createStatement();
 
 
-void databasemanager::addtoTable(std::string tab, std::string val)
-{
-    std::string statement = insert + tab + " " + values + val;
-    //create statement to execute
-
-    stmt->execute(statement); 
-    //execute query - use execute() for INSERT statements
-}
-
-//col= columns being selected, tab = table selected, specval = specfic value(column from search you want)
-std::string databasemanager::retString(std::string col, std::string tab, std::string specval)
-{
-    std::string tempstring; 
-    //string that will be returned;
-  
-    statement = select + col + " " + from + tab; 
-    //uses the statement variable to make a string statement for execution
-  
-    sql::ResultSet* res = stmt->executeQuery(statement); 
-    //executes the statement assigns value to res (result set)
-  
-    if (res->next()) {
-        tempstring = res->getString(specval); 
-        //searches returned statement for the specific value wanted.
+        std::string statement = ctable + "Transaction " + tID + " (TransactionID int primary key, accountId INT not null, accounttype VARCHAR(20) not null, transactiontype VARCHAR(20) not null, amount decimal(15,2) not null, transactiondate DATETIME not null, description VARCHAR(255));";
+        stmt->execute(statement);
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error: " << e.what() << std::endl;
     }
 
-    delete res;  //clean up result set only
-    // Don't delete stmt - it's a class member
-  
-    return tempstring;
+}
+
+void databasemanager::addtoTable(std::string tab, std::string val)
+{
+    sql::mysql::MySQL_Driver* driver;
+    sql::Connection* con;
+
+    try {
+        driver = sql::mysql::get_driver_instance();
+        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
+        con->setSchema("bankdatabase");
+        sql::Statement* stmt = con->createStatement();
+
+        std::string statement = insert + tab + " " + values + val;
+        //create statement to execute
+
+        stmt->execute(statement);
+        //execute query - use execute() for INSERT statements
+
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error: " << e.what() << std::endl;
+    }
 }
 
 
-std::string databasemanager::retStringW(std::string col, std::string tab, std::string val, std::string specval)
+//col= columns being selected, tab = table selected, specval = specfic value(column from search you want)
+sql::SQLString databasemanager::retString(std::string col, std::string tab, std::string specval)
+{
+    sql::SQLString tempstring; 
+    //string that will be returned;
+  
+    sql::mysql::MySQL_Driver* driver;
+    sql::Connection* con;
+
+    try {
+        driver = sql::mysql::get_driver_instance();
+        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
+        con->setSchema("bankdatabase");
+        sql::Statement* stmt = con->createStatement();
+
+
+        statement = select + col + " " + from + tab;
+        //uses the statement variable to make a string statement for execution
+
+        sql::ResultSet* res = stmt->executeQuery(statement);
+        //executes the statement assigns value to res (result set)
+
+        while (res->next()) {
+            tempstring = res->getString(specval);
+            //searches returned statement for the specific value wanted.
+        }
+
+        delete res;  //clean up result set only
+        // Don't delete stmt - it's a class member
+        return tempstring;
+
+
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error: " << e.what() << std::endl;
+    }
+ 
+}
+
+
+sql::SQLString databasemanager::retStringW(std::string col, std::string tab, std::string val, std::string specval)
 { //select statement with where 
     std::string tempstring; 
     //same comments and functions as retString
