@@ -11,8 +11,16 @@ databasemanager::databasemanager()
 
     try {
         driver = sql::mysql::get_driver_instance();
-        connection = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
-        connection->setSchema("bankdatabase");
+
+        string host = "136.114.146.175";
+		string user = "root";
+		string password = "gsbsTeam20$";
+		string db = "bankdatabase";
+
+		string url = "tcp://" + host + ":3306";
+        // connect to db
+        connection = driver->connect(url, user, password);
+        connection->setSchema("bankdb");
         stmt = connection->createStatement();
     }
     catch (sql::SQLException& e) {
