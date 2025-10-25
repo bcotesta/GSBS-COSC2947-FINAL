@@ -20,7 +20,7 @@ BankingWindow::BankingWindow(QWidget* parent, User user) : QWidget(parent),
     // eventually pull this data from database, passed in to the main
     currentUser(user),
     currentCustomer(1),
-    currentAccount("123456789", AccountType::CHEQUING)
+	currentAccount("123456789", AccountType::CHEQUING) // instead of creating a new account, pull the first account from customer
 {
     setupUI();
     initializeData();
