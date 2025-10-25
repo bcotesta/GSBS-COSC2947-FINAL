@@ -58,9 +58,9 @@ string switchAccount(Customer& customer) {
     return it->accountNumber();
 }
 
-void registerNewUser(string user, string pass, string email, string phone) {
+void registerNewUser(string user, string pass, string email, string phone, string add) {
 	int id = 2; // This would be generated or retrieved from a database. 
-    User newUser(id, user, pass, email, phone); // creates a new user with given info
+    User newUser(user, pass, email, phone, add); // creates a new user with given info
 }
 
 int main(int argc, char *argv[])
@@ -231,8 +231,8 @@ int main(int argc, char *argv[])
     registerButton->show();
 
     // -- DEBUGGING --
-    loginWindow.close();
-    bankingWindow->show();
+    //loginWindow.close();
+   // bankingWindow->show();
 
     return app.exec();
 }

@@ -4,7 +4,7 @@ using namespace std;
 class User
 {
 public:
-	User(int id, string n, string e, string p, string ph);
+	User(string n, string e, string p, string ph, string add); // since the database generates an id number when an account is created we wont need to establish it here
 
 	int userId() const;
 	string name() const;
@@ -21,7 +21,7 @@ public:
 	/// <param name="email"></param>
 	/// <param name="password"></param>
 	/// <param name="phone number"></param>
-	void updateProfile(string n, string e, string p, string ph);
+	void updateProfile(string id,string n, string e, string p, string ph);
 private:
 	int userId_;
 	string name_;

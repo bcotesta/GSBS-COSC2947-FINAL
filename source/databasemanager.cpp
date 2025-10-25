@@ -20,6 +20,39 @@ databasemanager::databasemanager()
     }
 }
 
+
+//accn = account number, accT = account type
+void databasemanager::createAccount(std::string accN, std::string accT)
+{
+    databasemanager d1;
+    std::string statement = "Create table if not exists account" + accN + "( accountId int not null, accountType VARCHAR(20) not NULL, Balance decimal(15,2) not null);";
+
+    stmt->execute(statement);
+    std::string statement = insert + accN;
+    std::string tvs = "(" + accN + ", " + accT+ ", 0.00)";
+    addtoTable("account"+accN, tvs);
+    
+
+
+}
+
+void databasemanager::createTransactionTb(std::string accnID, std::string tID)
+{
+    std::string statement = ctable + "Transaction " + tID + " (TransactionID int primary key, accountId INT not null, accounttype VARCHAR(20) not null, transactiontype VARCHAR(20) not null, amount decimal(15,2) not null, transactiondate DATETIME not null, description VARCHAR(255));";
+    stmt->execute(statement);
+
+}
+
+void databasemanager::addtoTable(std::string tab, std::string val)
+{
+    std::string statement = insert + tab + " " + values + val;
+    //create statement to execute
+
+    stmt->execute(statement);
+    //execute query - use execute() for INSERT statements
+}
+
+
 void databasemanager::addtoTable(std::string tab, std::string val)
 {
     std::string statement = insert + tab + " " + values + val;
@@ -29,6 +62,7 @@ void databasemanager::addtoTable(std::string tab, std::string val)
     //execute query - use execute() for INSERT statements
 }
 
+//col= columns being selected, tab = table selected, specval = specfic value(column from search you want)
 std::string databasemanager::retString(std::string col, std::string tab, std::string specval)
 {
     std::string tempstring; 
@@ -51,6 +85,7 @@ std::string databasemanager::retString(std::string col, std::string tab, std::st
     return tempstring;
 }
 
+
 std::string databasemanager::retStringW(std::string col, std::string tab, std::string val, std::string specval)
 { //select statement with where 
     std::string tempstring; 
@@ -59,7 +94,7 @@ std::string databasemanager::retStringW(std::string col, std::string tab, std::s
     //except here it uses the WHERE statement to give a more specific search
   
     sql::ResultSet* res = stmt->executeQuery(statement);
-    
+    //select statement to retrieve data for database
     if (res->next()) {
         tempstring = res->getString(specval);
     }

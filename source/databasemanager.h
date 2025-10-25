@@ -19,6 +19,12 @@ public:
 	~databasemanager();
 
 //functions
+	//tabn = table name
+	void createAccount(std::string accn, std::string accT);
+
+	void createTransactionTb(std::string accnID, std::string tID);
+
+
 	void addtoTable(std::string tab, std::string val);
 	// (t) table to add a row to, (v) values to insert in ('value1','value2') format 
 	// or "('"+ name + "', '" + email + "')" format with variables
@@ -35,11 +41,15 @@ public:
 
 private:
 	std::string statement;
-	std::string table;
+	/*std::string userinfo; // tables for easier sql queries
+	std::string accountinfo;
+	std::string investmentinfo;
+	std::string transactioninfo;*/
 	sql::Statement* stmt;        // Added missing member
 	sql::Connection* connection; // Added missing member
 // values for easier sql queries
 	std::string insert = "INSERT INTO ";
+	std::string ctable = "Create table ";
 	std::string values = "VALUES ";
 	std::string update =  "UPDATE ";
 	std::string set = "SET ";

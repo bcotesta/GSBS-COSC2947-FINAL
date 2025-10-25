@@ -2,6 +2,8 @@
 
 #include "Account.h"
 #include "Transaction.h" 
+#include "Types.h"
+#include "databasemanager.h"
 #include <iostream>
 #include <string>
 #include <chrono>
@@ -9,6 +11,28 @@ using namespace std;
 
 Account::Account(string accountNumber, AccountType accType)
 {
+    //create account using account number
+    databasemanager d1;
+
+    std::string accT = "";
+
+    switch (accType)
+    {
+    case AccountType::CHEQUING:
+        accT = "CHEQUING";
+    case AccountType::SAVINGS:
+        accT = "SAVINGS";
+    case AccountType::CREDIT:
+        accT = "CREDIT";
+    case AccountType::LOAN:
+        accT = "LOAN";
+    }
+
+
+    d1.createAccount(accountNumber, accT);
+    
+
+
     accountNumber_ = std::move(accountNumber);
     accountType_ = accType;
     balance_ = 0.0;
@@ -28,6 +52,8 @@ void Account::deposit(double amount)
         return;
     }
     balance_ += amount;
+
+    
 
     // Use a more robust ID generation
     static int nextId = 1;

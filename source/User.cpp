@@ -1,11 +1,17 @@
 // Brandon Cotesta 10/08/2025
 #include "User.h"
+#include "databasemanager.h"
+#include "databasemanager.cpp"
 
 #include <iostream>
 
-User::User(int id, string n, string e, string p, string ph): 
-	userId_(id), name_(n), email_(e), passwordHash_(p), phone_(ph)
+User::User(string n, string e, string p, string ph, string add): 
+	name_(n), email_(e), passwordHash_(p), phone_(ph), address_(add)
 {
+	databasemanager d1;
+	std::string tb = "userinfo";
+	std::string ts = "(" + n + ", " + e + ", " + p + ", " + ph + ", " + add + ")";
+	d1.addtoTable(tb, ts);
 	// create user
 }
 
@@ -43,12 +49,19 @@ void User::logout() const
 	// Dummy implementation for illustration
 	cout << "User " << name_ << " logged out." << endl;
 }
-void User::updateProfile(string n, string e, string p, string ph)
+void User::updateProfile(string id,string n, string e, string p, string ph)
 {
+	databasemanager d1;
 	name_ = n;
 	email_ = e;
 	passwordHash_ = p;
 	phone_ = ph;
+	
+	std::string tb = "userinfo";
+	std::string setc = "name = " + n + ", email + " + e + ", phone = " + ph + ", password = " + p;
+	std::string cond = " userID = " + id;
+	d1.updateTable(tb, setc, cond);
+
 }
 // Note: address_ is not updated as it's not passed in the parameters
 
