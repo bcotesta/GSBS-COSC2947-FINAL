@@ -8,8 +8,8 @@ User::User(string n, string e, string p, string ph):
 	name_(n), email_(e), passwordHash_(p), phone_(ph)
 {
 	databasemanager d1;
-	std::string tb = "userinfo";
-	std::string ts = "(" + n + ", " + e + ", " + p + ", " + ph + ")";
+	std::string tb = "userinfo (name,email,phone, password)";
+	std::string ts = "(" + n + ", " + e + ", " + ph + ", " + p + ")";
 	d1.addtoTable(tb, ts);
 	// create user
 }
