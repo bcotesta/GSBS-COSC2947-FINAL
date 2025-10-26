@@ -396,69 +396,9 @@ void BankingWindow::setupViews() {
     QVBoxLayout* homeLayout = new QVBoxLayout(homeView);
     welcomeLabel = new QLabel("Welcome!");
     homeLayout->addWidget(welcomeLabel);
-    /*QGroupBox* accountTypesBox = new QGroupBox("Accounts");
-    accountTypesBox->setStyleSheet(
-        "QGroupBox {"
-        "  font-weight: bold;"
-        "  font-size: 16px;"
-        "  border: 1px solid #cccccc;"
-        "  border-radius: 8px;"
-        "  margin-top: 10px;"
-        "  padding: 10px;"
-        "}"
-    );
-
-    QVBoxLayout* typesLayout = new QVBoxLayout(accountTypesBox);
-
-    QPushButton* chequingBtn = new QPushButton("Chequing");
-    QPushButton* savingsBtn = new QPushButton("Savings");
-    QPushButton* creditBtn = new QPushButton("Credit");
-    QPushButton* totalBtn = new QPushButton("Total:");
-    // Make them toggle buttons (only one active)
-    auto styleTypeButton = [](QPushButton* btn) {
-        btn->setCheckable(true);
-        btn->setFixedHeight(40);
-        btn->setStyleSheet(
-            "QPushButton {"
-            "  background-color: #f9f9f9;"
-            "  border: 1px solid #cccccc;"
-            "  border-radius: 6px;"
-            "  font-size: 14px;"
-            "  font-weight: bold;"
-            "  color: #333333;"
-            "  text-align: left;"
-            "  padding-left: 10px;"
-            "}"
-            "QPushButton:hover {"
-            "  background-color: #e6f0ff;"
-            "  border-color: #0078D7;"
-            "}"
-            "QPushButton:checked {"
-            "  background-color: #0078D7;"
-            "  color: white;"
-            "  border-color: #005fa3;"
-            "}"
-        );
-        };
-
-    styleTypeButton(chequingBtn);
-    styleTypeButton(savingsBtn);
-    styleTypeButton(creditBtn);
-    styleTypeButton(totalBtn);
-
-    // Add buttons vertically
-    typesLayout->addWidget(chequingBtn);
-    typesLayout->addWidget(savingsBtn);
-    typesLayout->addWidget(creditBtn);
-    typesLayout->addWidget(totalBtn);
-
-  
-
-    // Add the box to your home layout
-	homeLayout->addWidget(accountTypesBox);*/
-
-
-    // ---- Accounts box (no edges around items) ----
+  //-------------------------------SAHARA------------------------------------
+ 
+    // ---- Accounts box ----
     QGroupBox* accountTypesBox = new QGroupBox("Accounts");
     accountTypesBox->setStyleSheet(
         "QGroupBox {"
@@ -468,13 +408,10 @@ void BankingWindow::setupViews() {
         "  border-radius: 8px;"
         "  margin-top: 10px;"
         "  padding: 10px;"
-        "  color: white;"                      // title text color
-        "  background-color: #2b2b2b;"         // dark background
+        "  color: white;"
+        "  background-color: #2b2b2b;"
         "}"
-        "QLabel {"
-        "  font-size: 14px;"
-        "  color: white;"                      // all labels white
-        "}"
+        "QLabel { font-size: 14px; color: white; }"
     );
 
     // main layout inside the group box
@@ -483,31 +420,49 @@ void BankingWindow::setupViews() {
     typesLayout->setSpacing(6);
     accountTypesBox->setLayout(typesLayout);
 
-    // helper to add one row (name left, balance right)
-    auto addAccountRow = [&](const QString& name, const QString& amount, const QString& color = "#00aaff") {
-        QWidget* row = new QWidget(accountTypesBox);
-        auto* rowLayout = new QHBoxLayout(row);
-        rowLayout->setContentsMargins(0, 2, 0, 2);
-        rowLayout->setSpacing(6);
+    // helper lambda to add a row
+    auto addAccountRow = [&](const QString& typeName,
+        const QString& accountNumber,
+        const QString& amount,
+        const QString& color = "#00aaff") {
 
-        QLabel* nameLabel = new QLabel(name, row);
-        QLabel* balanceLabel = new QLabel(amount, row);
+            QWidget* row = new QWidget(accountTypesBox);
+            QHBoxLayout* rowLayout = new QHBoxLayout(row);
+            rowLayout->setContentsMargins(0, 2, 0, 2);
+            rowLayout->setSpacing(6);
 
-        nameLabel->setStyleSheet("color: white;"); // white text
-        balanceLabel->setStyleSheet(QString("font-weight: bold; color: %1;").arg(color));
-        balanceLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+            // left side: vertical stack for type + number
+            QVBoxLayout* leftLayout = new QVBoxLayout();
+            leftLayout->setContentsMargins(0, 0, 0, 0);
+            leftLayout->setSpacing(0);
 
-        rowLayout->addWidget(nameLabel);
-        rowLayout->addStretch();
-        rowLayout->addWidget(balanceLabel);
+            
+            QLabel* nameLabel = new QLabel(typeName, row);
+            QLabel* numberLabel = new QLabel(accountNumber, row);
 
-        typesLayout->addWidget(row);
+            nameLabel->setStyleSheet("font-size: 14px; font-weight: bold; color: white;");
+            numberLabel->setStyleSheet("font-size: 12px; color: #bbbbbb; margin-left: 2px;");
+
+            leftLayout->addWidget(nameLabel);
+            leftLayout->addWidget(numberLabel);
+
+            // right side: balance label
+            QLabel* balanceLabel = new QLabel(amount, row);
+            balanceLabel->setStyleSheet(QString("font-weight: bold; color: %1; font-size: 14px;").arg(color));
+            balanceLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+            // combine left + right into a row
+            rowLayout->addLayout(leftLayout);
+            rowLayout->addStretch();
+            rowLayout->addWidget(balanceLabel);
+
+            typesLayout->addWidget(row);
         };
 
-    // --- add account rows (no borders) ---
-    addAccountRow("Chequing", "$1,200.00");
-    addAccountRow("Savings", "$5,430.50");
-    addAccountRow("Credit", "-$320.00", "red");
+    // ---- Add rows ----
+    addAccountRow("Chequing", "Acct #123-456-789", "$1,200.00");
+    addAccountRow("Savings", "Acct #987-654-321", "$5,430.50");
+    addAccountRow("Credit", "Acct #555-111-222", "-$320.00", "red");
 
     // divider before total
     QFrame* divider = new QFrame(accountTypesBox);
@@ -515,31 +470,36 @@ void BankingWindow::setupViews() {
     divider->setStyleSheet("background-color: #555555; height: 1px;");
     typesLayout->addWidget(divider);
 
-    // total row at the bottom
-    {
-        QWidget* totalRow = new QWidget(accountTypesBox);
-        QHBoxLayout* totalLayout = new QHBoxLayout(totalRow);
-        totalLayout->setContentsMargins(0, 2, 0, 2);
+    // total row
+    QWidget* totalRow = new QWidget(accountTypesBox);
+    QHBoxLayout* totalLayout = new QHBoxLayout(totalRow);
+    totalLayout->setContentsMargins(0, 2, 0, 2);
 
-        QLabel* totalLabel = new QLabel("Total:", totalRow);
-        QLabel* totalValue = new QLabel("$6,950.50", totalRow);
+    QLabel* totalLabel = new QLabel("Total:", totalRow);
+    QLabel* totalValue = new QLabel("$6,950.50", totalRow);
 
-        totalLabel->setStyleSheet("font-weight: bold; color: white;");
-        totalValue->setStyleSheet("font-weight: bold; color: #00aaff;");
-        totalValue->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    totalLabel->setStyleSheet("font-weight: bold; color: white;");
+    totalValue->setStyleSheet("font-weight: bold; color: #00aaff;");
+    totalValue->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-        totalLayout->addWidget(totalLabel);
-        totalLayout->addStretch();
-        totalLayout->addWidget(totalValue);
+    totalLayout->addWidget(totalLabel);
+    totalLayout->addStretch();
+    totalLayout->addWidget(totalValue);
+    typesLayout->addWidget(totalRow);
 
-        typesLayout->addWidget(totalRow);
-    }
-
-    // finally add to your home layout
+    // finally add to home layout
     homeLayout->addWidget(accountTypesBox);
 
 
 
+
+
+
+
+
+
+
+//---------------------------------SAHARA-------------------------------------
 
 
     currentAccountLabel = new QLabel("Account: ");
