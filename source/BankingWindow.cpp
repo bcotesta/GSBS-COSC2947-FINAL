@@ -395,8 +395,8 @@ void BankingWindow::setupViews() {
     homeView = new QWidget();
     QVBoxLayout* homeLayout = new QVBoxLayout(homeView);
     welcomeLabel = new QLabel("Welcome!");
-
-    QGroupBox* accountTypesBox = new QGroupBox("Accounts (n)");
+    homeLayout->addWidget(welcomeLabel);
+    QGroupBox* accountTypesBox = new QGroupBox("Accounts");
     accountTypesBox->setStyleSheet(
         "QGroupBox {"
         "  font-weight: bold;"
@@ -413,7 +413,7 @@ void BankingWindow::setupViews() {
     QPushButton* chequingBtn = new QPushButton("Chequing");
     QPushButton* savingsBtn = new QPushButton("Savings");
     QPushButton* creditBtn = new QPushButton("Credit");
-
+    QPushButton* totalBtn = new QPushButton("Total:");
     // Make them toggle buttons (only one active)
     auto styleTypeButton = [](QPushButton* btn) {
         btn->setCheckable(true);
@@ -444,24 +444,24 @@ void BankingWindow::setupViews() {
     styleTypeButton(chequingBtn);
     styleTypeButton(savingsBtn);
     styleTypeButton(creditBtn);
+    styleTypeButton(totalBtn);
 
     // Add buttons vertically
     typesLayout->addWidget(chequingBtn);
     typesLayout->addWidget(savingsBtn);
     typesLayout->addWidget(creditBtn);
+    typesLayout->addWidget(totalBtn);
+
+  
 
     // Add the box to your home layout
     homeLayout->addWidget(accountTypesBox);
 
-
-
-    
-    welcomeLabel = new QLabel("Welcome!");
     currentAccountLabel = new QLabel("Account: ");
     balanceLabel = new QLabel("Balance: $0.00");
     accountSelector = new QComboBox();
     
-    homeLayout->addWidget(welcomeLabel);
+   
     homeLayout->addWidget(currentAccountLabel);
     homeLayout->addWidget(balanceLabel);
     homeLayout->addWidget(accountSelector);
