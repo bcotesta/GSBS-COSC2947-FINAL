@@ -14,8 +14,10 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QProgressBar>
-
+#include < QTableWidgetItem>
 #include <iostream>
+#include <QHeaderView>
+
 
 BankingWindow::BankingWindow(QWidget* parent) : QWidget(parent),
     // eventually pull this data from database
@@ -618,13 +620,177 @@ void BankingWindow::setupViews() {
 #pragma endregion
 
 
-#pragma region <Bills View>
+/*#pragma region <Bills View>
     billsView = new QWidget();
     QVBoxLayout* billsLayout = new QVBoxLayout(billsView);
     billsLayout->addWidget(new QLabel("Bills View"));
     billsLayout->addWidget(new QLabel("Bill payment functionality will go here"));
     contentStack->addWidget(billsView);
+#pragma endregion*/
+
+#pragma region <Bills View>
+    billsView = new QWidget();
+    QVBoxLayout* billsLayout = new QVBoxLayout(billsView);  // ✅ define it here
+    billsLayout->setAlignment(Qt::AlignTop);
+    billsLayout->setContentsMargins(40, 40, 40, 40);
+    billsLayout->setSpacing(25);
+
+    // --- Header ---
+    QLabel* billsHeader = new QLabel("Bills & Payments");
+    billsHeader->setStyleSheet(
+        "font-size: 22px; font-weight: bold; color: white; margin-bottom: 10px;"
+    );
+    billsLayout->addWidget(billsHeader);
+
+    // --- Vertical Button Stack ---
+    QVBoxLayout* btnColumn = new QVBoxLayout();
+    btnColumn->setSpacing(20);
+
+    QString billsButtonStyle =
+        "QPushButton {"
+        "  background-color: white;"
+        "  color: black;"
+        "  border: 1px solid #cccccc;"
+        "  border-radius: 10px;"
+        "  font-size: 14px;"
+        "  font-weight: bold;"
+        "  padding: 15px 25px;"
+        "}"
+        "QPushButton:hover {"
+        "  background-color: #f0f0f0;"
+        "  border: 1px solid #0078D7;"
+        "}"
+        "QPushButton:pressed {"
+        "  background-color: #e6e6e6;"
+        "}";
+
+    QPushButton* makePaymentBtn = new QPushButton("Make a Payment");
+    QPushButton* managePayeesBtn = new QPushButton("Manage Payees");
+    QPushButton* manageScheduleBtn = new QPushButton("Manage Scheduled Payments");
+
+    // Apply style
+    for (auto btn : { makePaymentBtn, managePayeesBtn, manageScheduleBtn }) {
+        btn->setStyleSheet(billsButtonStyle);
+        btn->setFixedHeight(60);
+        btn->setCursor(Qt::PointingHandCursor);
+        btnColumn->addWidget(btn);
+    }
+
+    billsLayout->addLayout(btnColumn);
+
+    // ✅ Now your new Scheduled Payments Box code
+    // --- Scheduled Payments Box (styled like Budget) ---
+    QGroupBox* scheduledBox = new QGroupBox("Scheduled Payments");
+    scheduledBox->setStyleSheet(
+        "QGroupBox {"
+        "  font-weight: bold;"
+        "  font-size: 16px;"
+        "  color: white;"
+        "  border: 1px solid #555555;"
+        "  border-radius: 8px;"
+        "  background-color: #2b2b2b;"
+        "  margin-top: 15px;"
+        "  padding: 10px;"
+        "}"
+        "QLabel { color: white; font-size: 14px; }"
+    );
+    billsLayout->addWidget(scheduledBox);
+
+    QVBoxLayout* scheduledLayout = new QVBoxLayout();
+    scheduledLayout->setContentsMargins(8, 8, 8, 8);
+    scheduledLayout->setSpacing(10);
+    scheduledBox->setLayout(scheduledLayout);
+
+    // Header row
+    {
+        QWidget* headerRow = new QWidget();
+        QHBoxLayout* headerLayout = new QHBoxLayout(headerRow);
+        headerLayout->setContentsMargins(0, 0, 0, 0);
+        headerLayout->setSpacing(0);
+
+        QLabel* nameHeader = new QLabel("Payee Name");
+        QLabel* freqHeader = new QLabel("Frequency");
+        QLabel* amtHeader = new QLabel("Amount");
+
+        nameHeader->setStyleSheet("font-weight: bold; color: #00aaff;");
+        freqHeader->setStyleSheet("font-weight: bold; color: #00aaff;");
+        amtHeader->setStyleSheet("font-weight: bold; color: #00aaff;");
+
+        headerLayout->addWidget(nameHeader);
+        headerLayout->addStretch();
+        headerLayout->addWidget(freqHeader);
+        headerLayout->addStretch();
+        headerLayout->addWidget(amtHeader);
+        scheduledLayout->addWidget(headerRow);
+    }
+
+    // Divider line
+    {
+        QFrame* divider = new QFrame();
+        divider->setFrameShape(QFrame::HLine);
+        divider->setStyleSheet("background-color: #555555; height: 1px;");
+        scheduledLayout->addWidget(divider);
+    }
+
+    // Helper lambda to add rows
+    auto addPaymentRow = [&](const QString& name, const QString& freq, const QString& amt, const QString& color = "#ffffff") {
+        QWidget* row = new QWidget();
+        QHBoxLayout* rowLayout = new QHBoxLayout(row);
+        rowLayout->setContentsMargins(0, 0, 0, 0);
+        rowLayout->setSpacing(0);
+
+        QLabel* nameLabel = new QLabel(name);
+        QLabel* freqLabel = new QLabel(freq);
+        QLabel* amtLabel = new QLabel(amt);
+
+        nameLabel->setStyleSheet("font-size: 14px; color: white;");
+        freqLabel->setStyleSheet("font-size: 14px; color: white;");
+        amtLabel->setStyleSheet(QString("font-weight: bold; color: %1; font-size: 14px;").arg(color));
+
+        rowLayout->addWidget(nameLabel);
+        rowLayout->addStretch();
+        rowLayout->addWidget(freqLabel);
+        rowLayout->addStretch();
+        rowLayout->addWidget(amtLabel);
+
+        scheduledLayout->addWidget(row);
+        };
+
+    // Add rows
+    addPaymentRow("Hydro One", "Monthly", "$120.00");
+    addPaymentRow("Internet Co.", "Monthly", "$89.99");
+    addPaymentRow("Credit Card", "Weekly", "$50.00");
+
+    // Divider and total row
+    {
+        QFrame* divider = new QFrame();
+        divider->setFrameShape(QFrame::HLine);
+        divider->setStyleSheet("background-color: #555555; height: 1px;");
+        scheduledLayout->addWidget(divider);
+
+        QWidget* totalRow = new QWidget();
+        QHBoxLayout* totalLayout = new QHBoxLayout(totalRow);
+        totalLayout->setContentsMargins(0, 0, 0, 0);
+
+        QLabel* totalLabel = new QLabel("Total Monthly Payments:");
+        QLabel* totalValue = new QLabel("$259.99");
+
+        totalLabel->setStyleSheet("font-weight: bold; color: white;");
+        totalValue->setStyleSheet("font-weight: bold; color: #00aaff;");
+
+        totalLayout->addWidget(totalLabel);
+        totalLayout->addStretch();
+        totalLayout->addWidget(totalValue);
+
+        scheduledLayout->addWidget(totalRow);
+    }
+
+    contentStack->addWidget(billsView);
 #pragma endregion
+
+
+
+
 
 /*#pragma region <Advice View>
     adviceView = new QWidget();

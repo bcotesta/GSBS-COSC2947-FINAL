@@ -12,6 +12,9 @@
 #include <QHBoxLayout>
 #include <QStackedWidget>
 #include <QProgressBar>
+#include < QTableWidgetItem>
+#include <QHeaderView>
+
 
 class BankingWindow : public QWidget {
     Q_OBJECT
