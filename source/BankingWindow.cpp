@@ -1,4 +1,4 @@
-// Brandon Cotesta 10/16/2025
+﻿// Brandon Cotesta 10/16/2025
 
 #include "BankingWindow.h"
 #include <algorithm>
@@ -48,6 +48,7 @@ void BankingWindow::onAccountChanged() {
 void BankingWindow::onViewBalance() {
     balanceLabel->setText(QString("Balance: $%1").arg(currentAccount.getBalance(), 0, 'f', 2));
     outputArea->append(QString("Account balance: $%1").arg(currentAccount.getBalance(), 0, 'f', 2));
+   
 }
 
 // -- onDeposit --
@@ -74,7 +75,7 @@ void BankingWindow::onDeposit() {
         outputArea->append(QString("Deposited $%1 to account %2")
             .arg(amount, 0, 'f', 2)
             .arg(QString::fromStdString(currentAccount.accountNumber())));
-        
+       
         // Update the account in customer's list
         updateAccountInCustomer();
     }
@@ -105,7 +106,7 @@ void BankingWindow::onWithdraw() {
             outputArea->append(QString("Withdrew $%1 from account %2")
                 .arg(amount, 0, 'f', 2)
                 .arg(QString::fromStdString(currentAccount.accountNumber())));
-            
+			
             // Update the account in customer's list
             updateAccountInCustomer();
         } else {
@@ -173,7 +174,7 @@ void BankingWindow::onTransfer() {
                     .arg(amount, 0, 'f', 2)
                     .arg(QString::fromStdString(currentAccount.accountNumber()))
                     .arg(toAccount));
-                
+				
                 // Refresh current account
                 onAccountChanged();
             } catch (const std::exception& e) {
@@ -189,7 +190,7 @@ void BankingWindow::onViewTransactions() {
     outputArea->clear();
     outputArea->append(QString("Recent transactions for account %1:").arg(QString::fromStdString(currentAccount.accountNumber())));
     outputArea->append("----------------------------------------");
-    
+	
     for (const auto& transaction : currentAccount.transactionHistory()) {
         QString transactionText = QString("%1 - %2: $%3")
             .arg(QString::fromStdString(transaction.date()))
@@ -282,6 +283,8 @@ void BankingWindow::setupUI() {
 
 	// Create top of screen toolbar'
 	tbLayout = new QHBoxLayout();
+    tbLayout->setContentsMargins(10, 10, 10, 10);
+    tbLayout->setSpacing(15);
 	mainLayout->addLayout(tbLayout);
     
 	// app title label
@@ -289,6 +292,33 @@ void BankingWindow::setupUI() {
 	titleLabel->setStyleSheet("font-weight: bold; font-size: 24px;");
 	tbLayout->addWidget(titleLabel);
 
+
+
+    searchBar = new QLineEdit();
+    searchBar->setPlaceholderText("🔍 Search...");
+    searchBar->setFixedHeight(35);
+    searchBar->setMinimumWidth(200);
+    searchBar->setStyleSheet(
+        "QLineEdit {"
+        "  background-color: rgb(255,255,255);"   
+        "  color: rgb(0,0,0);"                   
+        "  border: 1px solid #cccccc;"
+        "  border-radius: 8px;"
+        "  padding-left: 10px;"
+        "  font-size: 14px;"
+        "}"
+        "QLineEdit:focus {"
+        "  border: 1px solid #0078D7;"
+        "  background-color: rgb(255,255,255);"
+        "  color: rgb(0,0,0);"
+        "}"
+        "QLineEdit::placeholder {"
+        "  color: rgb(136,136,136);"
+        "}"
+    );
+
+    tbLayout->addWidget(searchBar);
+  
     // profile button
 	QPushButton* profileBtn = new QPushButton("Profile");
 	profileBtn->setFixedHeight(40);
@@ -298,6 +328,7 @@ void BankingWindow::setupUI() {
 		setCurrentView(5); // Profile view index
     });
 	tbLayout->addWidget(profileBtn);
+
 
 #pragma endregion
     
@@ -363,6 +394,67 @@ void BankingWindow::setupViews() {
 #pragma region <Home View>
     homeView = new QWidget();
     QVBoxLayout* homeLayout = new QVBoxLayout(homeView);
+    welcomeLabel = new QLabel("Welcome!");
+
+    QGroupBox* accountTypesBox = new QGroupBox("Accounts (n)");
+    accountTypesBox->setStyleSheet(
+        "QGroupBox {"
+        "  font-weight: bold;"
+        "  font-size: 16px;"
+        "  border: 1px solid #cccccc;"
+        "  border-radius: 8px;"
+        "  margin-top: 10px;"
+        "  padding: 10px;"
+        "}"
+    );
+
+    QVBoxLayout* typesLayout = new QVBoxLayout(accountTypesBox);
+
+    QPushButton* chequingBtn = new QPushButton("Chequing");
+    QPushButton* savingsBtn = new QPushButton("Savings");
+    QPushButton* creditBtn = new QPushButton("Credit");
+
+    // Make them toggle buttons (only one active)
+    auto styleTypeButton = [](QPushButton* btn) {
+        btn->setCheckable(true);
+        btn->setFixedHeight(40);
+        btn->setStyleSheet(
+            "QPushButton {"
+            "  background-color: #f9f9f9;"
+            "  border: 1px solid #cccccc;"
+            "  border-radius: 6px;"
+            "  font-size: 14px;"
+            "  font-weight: bold;"
+            "  color: #333333;"
+            "  text-align: left;"
+            "  padding-left: 10px;"
+            "}"
+            "QPushButton:hover {"
+            "  background-color: #e6f0ff;"
+            "  border-color: #0078D7;"
+            "}"
+            "QPushButton:checked {"
+            "  background-color: #0078D7;"
+            "  color: white;"
+            "  border-color: #005fa3;"
+            "}"
+        );
+        };
+
+    styleTypeButton(chequingBtn);
+    styleTypeButton(savingsBtn);
+    styleTypeButton(creditBtn);
+
+    // Add buttons vertically
+    typesLayout->addWidget(chequingBtn);
+    typesLayout->addWidget(savingsBtn);
+    typesLayout->addWidget(creditBtn);
+
+    // Add the box to your home layout
+    homeLayout->addWidget(accountTypesBox);
+
+
+
     
     welcomeLabel = new QLabel("Welcome!");
     currentAccountLabel = new QLabel("Account: ");
@@ -571,3 +663,4 @@ void setCurrentView(int index) {
 			break;
     }
 }
+

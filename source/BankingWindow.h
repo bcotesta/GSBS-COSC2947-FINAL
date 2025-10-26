@@ -34,6 +34,8 @@ private:
     QWidget* moreView;
     QWidget* profileView;
     
+   
+
     // UI Elements
     QLabel* welcomeLabel;
     QLabel* currentAccountLabel;
@@ -47,6 +49,9 @@ private:
     QPushButton* miniStatementBtn;
     QPushButton* newAccountBtn;
     QTextEdit* outputArea;
+    QLineEdit* searchBar;
+ 
+
 
 public:
     BankingWindow(QWidget* parent = nullptr);
