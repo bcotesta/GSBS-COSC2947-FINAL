@@ -633,13 +633,85 @@ void BankingWindow::setupViews() {
     contentStack->addWidget(adviceView);
 #pragma endregion
 
-#pragma region <More View>
+/*#pragma region <More View>
     moreView = new QWidget();
     QVBoxLayout* moreLayout = new QVBoxLayout(moreView);
     moreLayout->addWidget(new QLabel("More Options View"));
     moreLayout->addWidget(new QLabel("Additional features will go here"));
     contentStack->addWidget(moreView);
+#pragma endregion*/
+#pragma region <More View>
+    moreView = new QWidget();
+    QVBoxLayout* moreLayout = new QVBoxLayout(moreView);
+    moreLayout->setAlignment(Qt::AlignTop);
+    moreLayout->setContentsMargins(40, 40, 40, 40);
+    moreLayout->setSpacing(25);
+
+    // --- Header Label ---
+    QLabel* moreHeader = new QLabel("More Options");
+    moreHeader->setStyleSheet(
+        "font-size: 22px; font-weight: bold; color: white; margin-bottom: 20px;"
+    );
+    moreLayout->addWidget(moreHeader);
+
+    // ✅ Renamed variable to avoid redefinition
+    QString moreButtonStyle =
+        "QPushButton {"
+        "  background-color: white;"
+        "  color: black;"
+        "  border: 1px solid #cccccc;"
+        "  border-radius: 10px;"
+        "  font-size: 14px;"
+        "  font-weight: bold;"
+        "  padding: 15px 20px;"
+        "  text-align: left;"
+        "}"
+        "QPushButton:hover {"
+        "  background-color: #f5f5f5;"
+        "  border: 1px solid #0078D7;"
+        "}"
+        "QPushButton:pressed {"
+        "  background-color: #e6e6e6;"
+        "}";
+
+    // Create the buttons
+    QPushButton* profileBtn = new QPushButton("Profile and Settings");
+    QPushButton* securityBtn = new QPushButton("Sign-in and Security");
+    QPushButton* productsBtn = new QPushButton("Products and Services");
+    QPushButton* aboutAppBtn = new QPushButton("Get to Know the App");
+    QPushButton* contactBtn = new QPushButton("Contact Us");
+    QPushButton* faqBtn = new QPushButton("FAQ");
+    QPushButton* privacyBtn = new QPushButton("Privacy and Legal");
+    QPushButton* signoutBtn = new QPushButton("Sign Out");
+
+    // Apply style and add to layout
+    for (auto btn : { profileBtn, securityBtn, productsBtn, aboutAppBtn,
+                      contactBtn, faqBtn, privacyBtn, signoutBtn }) {
+        btn->setStyleSheet(moreButtonStyle);
+        btn->setMinimumHeight(50);
+        btn->setCursor(Qt::PointingHandCursor);
+        moreLayout->addWidget(btn);
+    }
+
+    // Special styling for Sign Out button
+    signoutBtn->setStyleSheet(
+        "QPushButton {"
+        "  background-color: #ff4c4c;"
+        "  color: white;"
+        "  border: none;"
+        "  border-radius: 10px;"
+        "  font-size: 14px;"
+        "  font-weight: bold;"
+        "  padding: 15px 20px;"
+        "}"
+        "QPushButton:hover { background-color: #e04343; }"
+        "QPushButton:pressed { background-color: #c93737; }"
+    );
+
+    contentStack->addWidget(moreView);
 #pragma endregion
+
+
 
 #pragma region <Profile View>
     profileView = new QWidget();
