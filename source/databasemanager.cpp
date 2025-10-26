@@ -19,9 +19,9 @@ databasemanager::databasemanager()
 
 		string url = "tcp://" + host + ":3306";
         // connect to db
-        connection = driver->connect(url, user, password);
+        /*connection = driver->connect(url, user, password);
         connection->setSchema("bankdb");
-        stmt = connection->createStatement();
+        stmt = connection->createStatement();*/
     }
     catch (sql::SQLException& e) {
         std::cerr << "SQL Error: " << e.what() << std::endl;

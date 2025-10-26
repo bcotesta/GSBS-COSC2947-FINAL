@@ -231,8 +231,8 @@ int main(int argc, char *argv[])
     registerButton->show();
 
     // -- DEBUGGING --
-    //loginWindow.close();
-   // bankingWindow->show();
+    loginWindow.close();
+    bankingWindow->show();
 
     return app.exec();
 }
