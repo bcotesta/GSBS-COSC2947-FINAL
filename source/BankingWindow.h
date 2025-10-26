@@ -70,6 +70,8 @@ private:
     void updateAccountInCustomer();
     void styleNavigationButton(QPushButton* button);
 
+
+
     // For the navbar / view switching
     void setCurrentView(int index);
     int currentViewIndex;
