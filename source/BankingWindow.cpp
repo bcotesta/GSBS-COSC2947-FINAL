@@ -654,7 +654,7 @@ void BankingWindow::setupViews() {
     );
     moreLayout->addWidget(moreHeader);
 
-    // ✅ Renamed variable to avoid redefinition
+    // Renamed variable to avoid redefinition
     QString moreButtonStyle =
         "QPushButton {"
         "  background-color: white;"
@@ -675,8 +675,6 @@ void BankingWindow::setupViews() {
         "}";
 
     // Create the buttons
-    QPushButton* profileBtn = new QPushButton("Profile and Settings");
-    QPushButton* securityBtn = new QPushButton("Sign-in and Security");
     QPushButton* productsBtn = new QPushButton("Products and Services");
     QPushButton* aboutAppBtn = new QPushButton("Get to Know the App");
     QPushButton* contactBtn = new QPushButton("Contact Us");
@@ -685,7 +683,7 @@ void BankingWindow::setupViews() {
     QPushButton* signoutBtn = new QPushButton("Sign Out");
 
     // Apply style and add to layout
-    for (auto btn : { profileBtn, securityBtn, productsBtn, aboutAppBtn,
+    for (auto btn : { productsBtn, aboutAppBtn,
                       contactBtn, faqBtn, privacyBtn, signoutBtn }) {
         btn->setStyleSheet(moreButtonStyle);
         btn->setMinimumHeight(50);
