@@ -491,14 +491,6 @@ void BankingWindow::setupViews() {
     homeLayout->addWidget(accountTypesBox);
 
 
-
-
-
-
-
-
-
-
 //---------------------------------SAHARA-------------------------------------
 
 
@@ -534,13 +526,96 @@ void BankingWindow::setupViews() {
     contentStack->addWidget(homeView);
 #pragma endregion
     
+//#pragma region <Transfers View>
+   // transfersView = new QWidget();
+   // QVBoxLayout* transfersLayout = new QVBoxLayout(transfersView);
+   // transfersLayout->addWidget(new QLabel("Transfers View"));
+   // transfersLayout->addWidget(new QLabel("Transfer functionality will go here"));
+   // contentStack->addWidget(transfersView);
+//#pragma endregion
+
+
 #pragma region <Transfers View>
     transfersView = new QWidget();
     QVBoxLayout* transfersLayout = new QVBoxLayout(transfersView);
-    transfersLayout->addWidget(new QLabel("Transfers View"));
-    transfersLayout->addWidget(new QLabel("Transfer functionality will go here"));
+    transfersLayout->setAlignment(Qt::AlignTop);
+    transfersLayout->setContentsMargins(40, 40, 40, 40);
+    transfersLayout->setSpacing(35);
+
+    // --- Header Label ---
+    QLabel* transfersHeader = new QLabel("Transfers & Banking Actions");
+    transfersHeader->setStyleSheet(
+        "font-size: 22px; font-weight: bold; color: white; margin-bottom: 20px;"
+    );
+    transfersLayout->addWidget(transfersHeader);
+
+    // --- Grid layout for 8 buttons (4 rows × 2 columns) ---
+    QGridLayout* grid = new QGridLayout();
+    grid->setHorizontalSpacing(60); // more space between columns
+    grid->setVerticalSpacing(45);   // more space between rows
+    grid->setContentsMargins(10, 10, 10, 10);
+
+    // Reusable button style (white squares, black text)
+    QString buttonStyle =
+        "QPushButton {"
+        "  background-color: white;"
+        "  color: black;"
+        "  border: 1px solid #cccccc;"
+        "  border-radius: 12px;"
+        "  font-size: 13px;"
+        "  font-weight: bold;"
+        "  padding: 10px;"
+        "}"
+        "QPushButton:hover {"
+        "  background-color: #f5f5f5;"
+        "  border: 1px solid #0078D7;"
+        "}"
+        "QPushButton:pressed {"
+        "  background-color: #e6e6e6;"
+        "}";
+
+    // Create buttons
+    QPushButton* interacBtn = new QPushButton("Interac e-Transfer");
+    QPushButton* fundsBtn = new QPushButton("Transfer Funds");
+    QPushButton* billsBtn = new QPushButton("Bill Payments");
+    QPushButton* depositBtn = new QPushButton("eDeposit");
+    QPushButton* manageBtn = new QPushButton("Manage Transactions");
+    QPushButton* investBtn = new QPushButton("Investing");
+    QPushButton* tfsaAddBtn = new QPushButton("Contribute to TFSA");
+    QPushButton* tfsaWithdrawBtn = new QPushButton("Withdraw from TFSA");
+
+    // Apply style and smaller, consistent size
+    for (auto btn : { interacBtn, fundsBtn, billsBtn, depositBtn,
+                      manageBtn, investBtn, tfsaAddBtn, tfsaWithdrawBtn }) {
+        btn->setStyleSheet(buttonStyle);
+        btn->setFixedSize(180, 80); // smaller box size
+    }
+
+    // --- Add buttons to grid (4 rows × 2 columns) ---
+    grid->addWidget(interacBtn, 0, 0);
+    grid->addWidget(fundsBtn, 0, 1);
+
+    grid->addWidget(billsBtn, 1, 0);
+    grid->addWidget(depositBtn, 1, 1);
+
+    grid->addWidget(manageBtn, 2, 0);
+    grid->addWidget(investBtn, 2, 1);
+
+    grid->addWidget(tfsaAddBtn, 3, 0);
+    grid->addWidget(tfsaWithdrawBtn, 3, 1);
+
+    // Add grid to layout
+    transfersLayout->addLayout(grid);
+
+    // Optional footer
+    QLabel* infoLabel = new QLabel("Select an option to continue.");
+    infoLabel->setStyleSheet("color: #bbbbbb; font-size: 13px; margin-top: 15px;");
+    infoLabel->setAlignment(Qt::AlignHCenter);
+    transfersLayout->addWidget(infoLabel);
+
     contentStack->addWidget(transfersView);
 #pragma endregion
+
 
 #pragma region <Bills View>
     billsView = new QWidget();
