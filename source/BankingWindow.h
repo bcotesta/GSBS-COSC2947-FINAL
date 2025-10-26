@@ -15,6 +15,9 @@
 #include < QTableWidgetItem>
 #include <QHeaderView>
 #include <QTimer>
+#include <QFormLayout>
+#include <QFileDialog>
+#include <QPixmap>
 
 class BankingWindow : public QWidget {
     Q_OBJECT

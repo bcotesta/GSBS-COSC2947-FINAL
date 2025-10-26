@@ -18,6 +18,9 @@
 #include <iostream>
 #include <QHeaderView>
 #include <QTimer>
+#include <QFormLayout>
+#include <QFileDialog>
+#include <QPixmap>
 
 
 BankingWindow::BankingWindow(QWidget* parent) : QWidget(parent),
@@ -529,14 +532,7 @@ void BankingWindow::setupViews() {
     
     contentStack->addWidget(homeView);
 #pragma endregion
-    
-//#pragma region <Transfers View>
-   // transfersView = new QWidget();
-   // QVBoxLayout* transfersLayout = new QVBoxLayout(transfersView);
-   // transfersLayout->addWidget(new QLabel("Transfers View"));
-   // transfersLayout->addWidget(new QLabel("Transfer functionality will go here"));
-   // contentStack->addWidget(transfersView);
-//#pragma endregion
+
 
 
 #pragma region <Transfers View>
@@ -544,90 +540,73 @@ void BankingWindow::setupViews() {
     QVBoxLayout* transfersLayout = new QVBoxLayout(transfersView);
     transfersLayout->setAlignment(Qt::AlignTop);
     transfersLayout->setContentsMargins(40, 40, 40, 40);
-    transfersLayout->setSpacing(35);
+    transfersLayout->setSpacing(20);
 
-    // --- Header Label ---
-    QLabel* transfersHeader = new QLabel("Transfers & Banking Actions");
-    transfersHeader->setStyleSheet(
-        "font-size: 22px; font-weight: bold; color: white; margin-bottom: 20px;"
-    );
+    QLabel* transfersHeader = new QLabel("Transfers & Payments");
+    transfersHeader->setStyleSheet("font-size: 22px; font-weight: bold; color: white;");
     transfersLayout->addWidget(transfersHeader);
 
-    // --- Grid layout for 8 buttons (4 rows × 2 columns) ---
+    // Grid for buttons
     QGridLayout* grid = new QGridLayout();
-    grid->setHorizontalSpacing(60); // more space between columns
-    grid->setVerticalSpacing(45);   // more space between rows
-    grid->setContentsMargins(10, 10, 10, 10);
+    grid->setHorizontalSpacing(30);   // space between columns
+    grid->setVerticalSpacing(25);     // space between rows
 
-    // Reusable button style (white squares, black text)
-    QString buttonStyle =
+    QString gridButtonStyle =
         "QPushButton {"
         "  background-color: white;"
         "  color: black;"
-        "  border: 1px solid #cccccc;"
-        "  border-radius: 12px;"
-        "  font-size: 13px;"
+        "  font-size: 14px;"
         "  font-weight: bold;"
-        "  padding: 10px;"
+        "  border: 1px solid #cccccc;"
+        "  border-radius: 10px;"
+        "  min-width: 160px;"
+        "  min-height: 70px;"
         "}"
         "QPushButton:hover {"
-        "  background-color: #f5f5f5;"
+        "  background-color: #f0f0f0;"
         "  border: 1px solid #0078D7;"
         "}"
         "QPushButton:pressed {"
         "  background-color: #e6e6e6;"
         "}";
 
-    // Create buttons
+    // Create all buttons
     QPushButton* interacBtn = new QPushButton("Interac e-Transfer");
-    QPushButton* fundsBtn = new QPushButton("Transfer Funds");
-    QPushButton* billsBtn = new QPushButton("Bill Payments");
-    QPushButton* depositBtn = new QPushButton("eDeposit");
-    QPushButton* manageBtn = new QPushButton("Manage Transactions");
-    QPushButton* investBtn = new QPushButton("Investing");
-    QPushButton* tfsaAddBtn = new QPushButton("Contribute to TFSA");
-    QPushButton* tfsaWithdrawBtn = new QPushButton("Withdraw from TFSA");
+    QPushButton* transferFundsBtn = new QPushButton("Transfer Funds");
+    QPushButton* billPaymentsBtn = new QPushButton("Bill Payments");
+    QPushButton* eDepositBtn = new QPushButton("eDeposit");
+    QPushButton* manageTxBtn = new QPushButton("Manage Transactions");
+    QPushButton* investingBtn = new QPushButton("Investing");
+    QPushButton* contributeTFSABtn = new QPushButton("Contribute to TFSA");
+    QPushButton* withdrawTFSABtn = new QPushButton("Withdraw from TFSA");
 
-    // Apply style and smaller, consistent size
-    for (auto btn : { interacBtn, fundsBtn, billsBtn, depositBtn,
-                      manageBtn, investBtn, tfsaAddBtn, tfsaWithdrawBtn }) {
-        btn->setStyleSheet(buttonStyle);
-        btn->setFixedSize(180, 80); // smaller box size
+    // Apply style
+    QList<QPushButton*> buttons = { interacBtn, transferFundsBtn, billPaymentsBtn, eDepositBtn,
+                                    manageTxBtn, investingBtn, contributeTFSABtn, withdrawTFSABtn };
+
+    for (auto* btn : buttons) {
+        btn->setStyleSheet(gridButtonStyle);
+        btn->setCursor(Qt::PointingHandCursor);
     }
 
-    // --- Add buttons to grid (4 rows × 2 columns) ---
+    // Add to grid (2 columns × 4 rows)
     grid->addWidget(interacBtn, 0, 0);
-    grid->addWidget(fundsBtn, 0, 1);
+    grid->addWidget(transferFundsBtn, 0, 1);
+    grid->addWidget(billPaymentsBtn, 1, 0);
+    grid->addWidget(eDepositBtn, 1, 1);
+    grid->addWidget(manageTxBtn, 2, 0);
+    grid->addWidget(investingBtn, 2, 1);
+    grid->addWidget(contributeTFSABtn, 3, 0);
+    grid->addWidget(withdrawTFSABtn, 3, 1);
 
-    grid->addWidget(billsBtn, 1, 0);
-    grid->addWidget(depositBtn, 1, 1);
-
-    grid->addWidget(manageBtn, 2, 0);
-    grid->addWidget(investBtn, 2, 1);
-
-    grid->addWidget(tfsaAddBtn, 3, 0);
-    grid->addWidget(tfsaWithdrawBtn, 3, 1);
-
-    // Add grid to layout
     transfersLayout->addLayout(grid);
-
-    // Optional footer
-    QLabel* infoLabel = new QLabel("Select an option to continue.");
-    infoLabel->setStyleSheet("color: #bbbbbb; font-size: 13px; margin-top: 15px;");
-    infoLabel->setAlignment(Qt::AlignHCenter);
-    transfersLayout->addWidget(infoLabel);
-
     contentStack->addWidget(transfersView);
 #pragma endregion
 
 
-/*#pragma region <Bills View>
-    billsView = new QWidget();
-    QVBoxLayout* billsLayout = new QVBoxLayout(billsView);
-    billsLayout->addWidget(new QLabel("Bills View"));
-    billsLayout->addWidget(new QLabel("Bill payment functionality will go here"));
-    contentStack->addWidget(billsView);
-#pragma endregion*/
+
+
+
 
 #pragma region <Bills View>
     billsView = new QWidget();
@@ -793,13 +772,7 @@ void BankingWindow::setupViews() {
 
 
 
-/*#pragma region <Advice View>
-    adviceView = new QWidget();
-    QVBoxLayout* adviceLayout = new QVBoxLayout(adviceView);
-    adviceLayout->addWidget(new QLabel("Financial Advice View"));
-    adviceLayout->addWidget(new QLabel("Financial advice content will go here"));
-    contentStack->addWidget(adviceView);
-#pragma endregion*/
+
 #pragma region <Advice View>
     adviceView = new QWidget();
     QVBoxLayout* adviceLayout = new QVBoxLayout(adviceView);
