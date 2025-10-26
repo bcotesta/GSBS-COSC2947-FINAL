@@ -13,6 +13,7 @@
 #include <QGroupBox>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QProgressBar>
 
 #include <iostream>
 
@@ -625,13 +626,180 @@ void BankingWindow::setupViews() {
     contentStack->addWidget(billsView);
 #pragma endregion
 
-#pragma region <Advice View>
+/*#pragma region <Advice View>
     adviceView = new QWidget();
     QVBoxLayout* adviceLayout = new QVBoxLayout(adviceView);
     adviceLayout->addWidget(new QLabel("Financial Advice View"));
     adviceLayout->addWidget(new QLabel("Financial advice content will go here"));
     contentStack->addWidget(adviceView);
+#pragma endregion*/
+#pragma region <Advice View>
+    adviceView = new QWidget();
+    QVBoxLayout* adviceLayout = new QVBoxLayout(adviceView);
+    adviceLayout->setAlignment(Qt::AlignTop);
+    adviceLayout->setContentsMargins(40, 40, 40, 40);
+    adviceLayout->setSpacing(25);
+
+    // --- Header Label ---
+    QLabel* adviceHeader = new QLabel("Financial Advice");
+    adviceHeader->setStyleSheet(
+        "font-size: 22px; font-weight: bold; color: white; margin-bottom: 10px;"
+    );
+    adviceLayout->addWidget(adviceHeader);
+
+    // --- My Goals Group Box ---
+    QGroupBox* goalsBox = new QGroupBox("My Goals");
+    goalsBox->setStyleSheet(
+        "QGroupBox {"
+        "  font-weight: bold;"
+        "  font-size: 16px;"
+        "  color: white;"
+        "  border: 1px solid #555555;"
+        "  border-radius: 10px;"
+        "  margin-top: 10px;"
+        "  padding: 15px;"
+        "}"
+    );
+    QVBoxLayout* goalsLayout = new QVBoxLayout(goalsBox);
+    goalsLayout->setSpacing(20);
+
+    // --- Goal 1: Education ---
+    QWidget* eduGoal = new QWidget();
+    QHBoxLayout* eduLayout = new QHBoxLayout(eduGoal);
+    eduLayout->setContentsMargins(0, 0, 0, 0);
+
+    QLabel* eduLabel = new QLabel("🎓 Saving for Education");
+    eduLabel->setStyleSheet("font-size: 14px; color: white; font-weight: bold;");
+    QProgressBar* eduProgress = new QProgressBar();
+    eduProgress->setValue(70); // 70% complete
+    eduProgress->setTextVisible(true);
+    eduProgress->setFormat("%p%");
+    eduProgress->setFixedHeight(20);
+    eduProgress->setStyleSheet(
+        "QProgressBar {"
+        "  border: 1px solid #444;"
+        "  border-radius: 5px;"
+        "  background-color: #2b2b2b;"
+        "  color: white;"
+        "  text-align: center;"
+        "}"
+        "QProgressBar::chunk {"
+        "  background-color: #00aaff;"
+        "  border-radius: 5px;"
+        "}"
+    );
+    eduLayout->addWidget(eduLabel);
+    eduLayout->addSpacing(20);
+    eduLayout->addWidget(eduProgress);
+    goalsLayout->addWidget(eduGoal);
+
+    // --- Goal 2: Travel ---
+    QWidget* travelGoal = new QWidget();
+    QHBoxLayout* travelLayout = new QHBoxLayout(travelGoal);
+    travelLayout->setContentsMargins(0, 0, 0, 0);
+
+    QLabel* travelLabel = new QLabel("✈️ Saving for Travel");
+    travelLabel->setStyleSheet("font-size: 14px; color: white; font-weight: bold;");
+    QProgressBar* travelProgress = new QProgressBar();
+    travelProgress->setValue(40); // 40% complete
+    travelProgress->setTextVisible(true);
+    travelProgress->setFormat("%p%");
+    travelProgress->setFixedHeight(20);
+    travelProgress->setStyleSheet(
+        "QProgressBar {"
+        "  border: 1px solid #444;"
+        "  border-radius: 5px;"
+        "  background-color: #2b2b2b;"
+        "  color: white;"
+        "  text-align: center;"
+        "}"
+        "QProgressBar::chunk {"
+        "  background-color: #ffaa00;"
+        "  border-radius: 5px;"
+        "}"
+    );
+    travelLayout->addWidget(travelLabel);
+    travelLayout->addSpacing(20);
+    travelLayout->addWidget(travelProgress);
+    goalsLayout->addWidget(travelGoal);
+
+    // Add the goals box to the main layout
+    adviceLayout->addWidget(goalsBox);
+
+    // --- Optional Tip Section ---
+    QLabel* tipsLabel = new QLabel(
+        "💡 Tip: Set aside small, consistent amounts for your goals each week.\n"
+        "Even $20/week can make a big difference over time!"
+    );
+    tipsLabel->setWordWrap(true);
+    tipsLabel->setStyleSheet("font-size: 13px; color: #cccccc;");
+    adviceLayout->addWidget(tipsLabel);
+
+    contentStack->addWidget(adviceView);
+
+
+    // --- Budget Overview Box ---
+    QGroupBox* budgetBox = new QGroupBox("Budget Overview");
+    budgetBox->setStyleSheet(
+        "QGroupBox {"
+        "  font-weight: bold;"
+        "  font-size: 16px;"
+        "  color: white;"
+        "  border: 1px solid #555555;"
+        "  border-radius: 10px;"
+        "  margin-top: 20px;"
+        "  padding: 15px;"
+        "}"
+        "QLabel { color: white; font-size: 13px; }"
+    );
+
+    QGridLayout* budgetLayout = new QGridLayout();
+    budgetLayout->setContentsMargins(10, 10, 10, 10);
+    budgetLayout->setHorizontalSpacing(40);
+    budgetLayout->setVerticalSpacing(15);
+
+    // --- Header Row ---
+    QLabel* categoryHeader = new QLabel("Category");
+    QLabel* projectedHeader = new QLabel("Projected ($)");
+    QLabel* actualHeader = new QLabel("Actual ($)");
+
+    categoryHeader->setStyleSheet("font-weight: bold; color: #00aaff;");
+    projectedHeader->setStyleSheet("font-weight: bold; color: #00aaff;");
+    actualHeader->setStyleSheet("font-weight: bold; color: #00aaff;");
+
+    budgetLayout->addWidget(categoryHeader, 0, 0);
+    budgetLayout->addWidget(projectedHeader, 0, 1);
+    budgetLayout->addWidget(actualHeader, 0, 2);
+
+    // --- Budget Rows ---
+    auto addBudgetRow = [&](int row, const QString& category, double projected, double actual) {
+        QLabel* catLabel = new QLabel(category);
+        QLabel* projLabel = new QLabel(QString("$%1").arg(projected, 0, 'f', 2));
+        QLabel* actLabel = new QLabel(QString("$%1").arg(actual, 0, 'f', 2));
+
+        // Conditional color based on overspending
+        QString color = (actual > projected) ? "red" : "#00ff88";
+        actLabel->setStyleSheet(QString("font-weight: bold; color: %1;").arg(color));
+
+        budgetLayout->addWidget(catLabel, row, 0);
+        budgetLayout->addWidget(projLabel, row, 1);
+        budgetLayout->addWidget(actLabel, row, 2);
+        };
+
+    // Example categories
+    addBudgetRow(1, "Housing", 1200.00, 1180.00);
+    addBudgetRow(2, "Groceries", 400.00, 425.00);
+    addBudgetRow(3, "Entertainment", 200.00, 150.00);
+    addBudgetRow(4, "Transportation", 180.00, 200.00);
+    addBudgetRow(5, "Utilities", 250.00, 230.00);
+
+    budgetBox->setLayout(budgetLayout);
+
+    // Add it to the Advice layout
+    adviceLayout->addWidget(budgetBox);
+
 #pragma endregion
+
 
 /*#pragma region <More View>
     moreView = new QWidget();

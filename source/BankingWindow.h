@@ -11,6 +11,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QStackedWidget>
+#include <QProgressBar>
 
 class BankingWindow : public QWidget {
     Q_OBJECT
