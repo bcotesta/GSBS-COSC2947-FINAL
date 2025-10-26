@@ -37,7 +37,7 @@ void databasemanager::createAccount(std::string accN, std::string accT)
 
     try {
         driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
+        con = driver->connect("tcp://136.114.146.175:3306", "root", "gsbsTeam20$");
         con->setSchema("bankdatabase");
         cout << "connected";
 
@@ -64,7 +64,7 @@ void databasemanager::createTransactionTb(std::string accnID, std::string tID)
     sql::Connection* con;
     try {
         driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
+        con = driver->connect("tcp://136.114.146.175:3306", "root", "gsbsTeam20$");
         con->setSchema("bankdatabase");
         cout << "connected";
         sql::Statement* stmt = con->createStatement();
@@ -87,7 +87,7 @@ void databasemanager::addtoTable(std::string tab, std::string val)
 
     try {
         driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
+        con = driver->connect("tcp://136.114.146.175:3306", "root", "gsbsTeam20$");
         con->setSchema("bankdatabase");
         cout << "connected";
         sql::Statement* stmt = con->createStatement();
@@ -116,7 +116,7 @@ sql::SQLString databasemanager::retString(std::string col, std::string tab, std:
 
     try {
         driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
+        con = driver->connect("tcp://136.114.146.175:3306", "root", "gsbsTeam20$");
         con->setSchema("bankdatabase");
         cout << "connected";
         sql::Statement* stmt = con->createStatement();
@@ -174,7 +174,7 @@ void databasemanager::updateTable(std::string tab, std::string setv, std::string
 
     try {
         driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
+        con = driver->connect("tcp://136.114.146.175:3306", "root", "gsbsTeam20$");
         con->setSchema("bankdatabase");
         cout << "connected";
         sql::Statement* stmt = con->createStatement();
