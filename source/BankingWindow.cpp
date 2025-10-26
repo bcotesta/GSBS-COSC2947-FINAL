@@ -537,343 +537,249 @@ void BankingWindow::setupViews() {
 
 
 
-
-
-
-
-
-
-
-
-
-// transfers tab transfer between accounts + edeposit
 #pragma region <Transfers View>
-
-// ---------------------------------------------------------
-// TRANSFERS MAIN PAGE (within main contentStack)
-// ---------------------------------------------------------
+// ========================= TRANSFERS TAB =========================
 transfersView = new QWidget();
 QVBoxLayout* transfersLayout = new QVBoxLayout(transfersView);
-transfersLayout->setAlignment(Qt::AlignTop);
-transfersLayout->setContentsMargins(40, 40, 40, 40);
+transfersLayout->setContentsMargins(20, 20, 20, 20);
 transfersLayout->setSpacing(20);
 
-QLabel* transfersHeader = new QLabel("Transfers & Payments");
-transfersHeader->setStyleSheet("font-size: 22px; font-weight: bold; color: white;");
-transfersLayout->addWidget(transfersHeader);
+// Title
+QLabel* transfersTitle = new QLabel("Transfers & Payments");
+transfersTitle->setStyleSheet("font-size: 22px; font-weight: bold; color: white;");
+transfersLayout->addWidget(transfersTitle);
 
-// Create an internal stack for subpages
+// Create stacked widget for all transfer pages
 QStackedWidget* transferStack = new QStackedWidget();
 transfersLayout->addWidget(transferStack, 1);
 
-// ---------------------------------------------------------
-// PAGE 0: Main transfer menu
-// ---------------------------------------------------------
-QWidget* transferMenu = new QWidget();
-QGridLayout* grid = new QGridLayout(transferMenu);
-grid->setHorizontalSpacing(40);
-grid->setVerticalSpacing(30);
+// ========================= MAIN MENU =========================
+QWidget* transferMainMenu = new QWidget();
+QGridLayout* transferGrid = new QGridLayout(transferMainMenu);
+transferGrid->setHorizontalSpacing(30);
+transferGrid->setVerticalSpacing(25);
 
-QString gridButtonStyle =
+QString transferButtonStyle =
 "QPushButton {"
 "  background-color: white;"
 "  color: black;"
-"  font-size: 14px;"
 "  font-weight: bold;"
-"  border: 1px solid #cccccc;"
+"  border: none;"
 "  border-radius: 10px;"
-"  min-width: 160px;"
-"  min-height: 70px;"
+"  padding: 20px;"
+"  font-size: 14px;"
 "}"
-"QPushButton:hover { background-color: #f0f0f0; border: 1px solid #0078D7; }"
-"QPushButton:pressed { background-color: #e6e6e6; }";
+"QPushButton:hover {"
+"  background-color: #e6f0ff;"
+"}"
+"QPushButton:pressed {"
+"  background-color: #cce0ff;"
+"}";
 
+// Define all buttons
 QPushButton* btnInterac = new QPushButton("Interac e-Transfer");
-QPushButton* btnTransferFunds = new QPushButton("Transfer Funds");
-QPushButton* btnBillPayments = new QPushButton("Bill Payments");
+QPushButton* btnFunds = new QPushButton("Transfer Funds");
+QPushButton* btnBills = new QPushButton("Bill Payments");
 QPushButton* btnEDeposit = new QPushButton("eDeposit");
-QPushButton* btnManageTx = new QPushButton("Manage Transactions");
+QPushButton* btnManageTransactions = new QPushButton("Manage Transactions");
 QPushButton* btnInvesting = new QPushButton("Investing");
-QPushButton* btnTFSAContrib = new QPushButton("Contribute to TFSA");
+QPushButton* btnTFSAContribute = new QPushButton("Contribute to TFSA");
 QPushButton* btnTFSAWithdraw = new QPushButton("Withdraw from TFSA");
 
-QList<QPushButton*> transferButtons = {
-    btnInterac, btnTransferFunds, btnBillPayments, btnEDeposit,
-    btnManageTx, btnInvesting, btnTFSAContrib, btnTFSAWithdraw
+QPushButton* transferButtons[] = {
+    btnInterac, btnFunds, btnBills, btnEDeposit,
+    btnManageTransactions, btnInvesting, btnTFSAContribute, btnTFSAWithdraw
 };
 
 for (auto* btn : transferButtons) {
-    btn->setStyleSheet(gridButtonStyle);
-    btn->setCursor(Qt::PointingHandCursor);
+    btn->setStyleSheet(transferButtonStyle);
+    btn->setFixedSize(200, 80);
 }
 
-// --- 2 columns × 4 rows layout ---
-grid->addWidget(btnInterac, 0, 0);
-grid->addWidget(btnTransferFunds, 0, 1);
-grid->addWidget(btnBillPayments, 1, 0);
-grid->addWidget(btnEDeposit, 1, 1);
-grid->addWidget(btnManageTx, 2, 0);
-grid->addWidget(btnInvesting, 2, 1);
-grid->addWidget(btnTFSAContrib, 3, 0);
-grid->addWidget(btnTFSAWithdraw, 3, 1);
+// Add buttons to 2-column × 4-row grid
+int index = 0;
+for (int row = 0; row < 4; ++row) {
+    for (int col = 0; col < 2; ++col) {
+        if (index < 8) transferGrid->addWidget(transferButtons[index++], row, col);
+    }
+}
 
-transferStack->addWidget(transferMenu);
+transferStack->addWidget(transferMainMenu); // Page 0
 
-// ---------------------------------------------------------
-// PAGE CREATOR for simple subpages
-// ---------------------------------------------------------
-auto createTransferPage = [&](const QString& title, const QString& text) {
-    QWidget* page = new QWidget();
-    QVBoxLayout* layout = new QVBoxLayout(page);
-    layout->setContentsMargins(40, 30, 40, 30);
-    layout->setSpacing(15);
-    layout->setAlignment(Qt::AlignTop);
+// ========================= TRANSFER FUNDS PAGE =========================
+QWidget* transferFundsPage = new QWidget();
+QVBoxLayout* transferFundsLayout = new QVBoxLayout(transferFundsPage);
+transferFundsLayout->setContentsMargins(40, 30, 40, 30);
+transferFundsLayout->setSpacing(15);
 
-    QLabel* header = new QLabel(title);
-    header->setStyleSheet("font-size: 22px; font-weight: bold; color: white;");
-    layout->addWidget(header);
+QLabel* transferFundsHeader = new QLabel("Transfer Funds Between Accounts");
+transferFundsHeader->setStyleSheet("font-size: 22px; font-weight: bold; color: white;");
+transferFundsLayout->addWidget(transferFundsHeader);
 
-    QLabel* desc = new QLabel(text);
-    desc->setWordWrap(true);
-    desc->setStyleSheet("font-size: 14px; color: #cccccc;");
-    layout->addWidget(desc);
+QFormLayout* transferFundsForm = new QFormLayout();
+QComboBox* transferFromAccount = new QComboBox();
+QComboBox* transferToAccount = new QComboBox();
 
-    QPushButton* back = new QPushButton("← Back");
-    back->setStyleSheet(
-        "QPushButton { background-color: #0078D7; color: white; border-radius: 8px; padding: 8px 16px; }"
-        "QPushButton:hover { background-color: #005fa3; }"
-    );
-    layout->addWidget(back);
+transferFromAccount->addItems({ "Chequing (****6789)", "Savings (****1234)", "Credit (****9012)" });
+transferToAccount->addItems({ "Chequing (****6789)", "Savings (****1234)", "Credit (****9012)" });
 
-    QObject::connect(back, &QPushButton::clicked, [=]() { transferStack->setCurrentIndex(0); });
+QLineEdit* transferFundsAmount = new QLineEdit();
+transferFundsAmount->setPlaceholderText("Amount ($)");
 
-    transferStack->addWidget(page);
-    return page;
-    };
+transferFundsForm->addRow("From:", transferFromAccount);
+transferFundsForm->addRow("To:", transferToAccount);
+transferFundsForm->addRow("Amount ($):", transferFundsAmount);
+transferFundsLayout->addLayout(transferFundsForm);
 
-// ---------------------------------------------------------
-// SIMPLE SUBPAGES
-// ---------------------------------------------------------
-QWidget* transferInteracPage = createTransferPage("Interac e-Transfer",
-    "Send and receive money securely using Interac e-Transfer.\n\n"
-    "Send funds directly to any Canadian bank account using email or phone number.");
+QPushButton* confirmFundsTransferBtn = new QPushButton("Transfer Now");
+confirmFundsTransferBtn->setFixedHeight(40);
+confirmFundsTransferBtn->setStyleSheet("background-color: #0078D7; color: white; font-weight: bold; border-radius: 6px;");
+transferFundsLayout->addWidget(confirmFundsTransferBtn);
 
-QWidget* transferBillPaymentsPage = createTransferPage("Bill Payments",
-    "Pay your bills easily from your GSBS account.\n\n"
-    "You can manage payees, schedule recurring payments, and track payment history.");
-
-QWidget* transferManageTxPage = createTransferPage("Manage Transactions",
-    "View, filter, and track all recent transactions.\n\n"
-    "Easily search by date, amount, or recipient.");
-
-QWidget* transferInvestingPage = createTransferPage("Investing",
-    "Access GSBS investment options to grow your savings.\n\n"
-    "Track performance and plan your financial future.");
-
-QWidget* transferTFSAContribPage = createTransferPage("Contribute to TFSA",
-    "Add funds to your Tax-Free Savings Account.\n\n"
-    "Monitor contribution limits and maximize growth potential.");
-
-QWidget* transferTFSAWithdrawPage = createTransferPage("Withdraw from TFSA",
-    "Withdraw funds safely from your TFSA.\n\n"
-    "Review available balance and confirm details.");
-
-// ---------------------------------------------------------
-// INTERACTIVE TRANSFER FUNDS PAGE
-// ---------------------------------------------------------
-QWidget* fundsPage = new QWidget();
-QVBoxLayout* fundsLayout = new QVBoxLayout(fundsPage);
-fundsLayout->setContentsMargins(40, 30, 40, 30);
-fundsLayout->setSpacing(15);
-
-QLabel* fundsHeader = new QLabel("Transfer Funds");
-fundsHeader->setStyleSheet("font-size: 22px; font-weight: bold; color: white;");
-fundsLayout->addWidget(fundsHeader);
-
-QLabel* fundsDesc = new QLabel(
-    "Easily move money between your GSBS accounts.\n\n"
-    "Select your source and destination accounts, enter an amount, and click Transfer.");
-fundsDesc->setStyleSheet("font-size: 14px; color: #cccccc;");
-fundsDesc->setWordWrap(true);
-fundsLayout->addWidget(fundsDesc);
-
-QFormLayout* fundsForm = new QFormLayout();
-QComboBox* fromAccount = new QComboBox();
-QComboBox* toAccount = new QComboBox();
-QLineEdit* amountField = new QLineEdit();
-
-fromAccount->addItems({ "Chequing - 123456789", "Savings - 987654321", "Credit - 555111222" });
-toAccount->addItems({ "Chequing - 123456789", "Savings - 987654321", "Credit - 555111222" });
-
-amountField->setPlaceholderText("Enter amount to transfer ($)");
-fundsForm->addRow("From Account:", fromAccount);
-fundsForm->addRow("To Account:", toAccount);
-fundsForm->addRow("Amount:", amountField);
-fundsLayout->addLayout(fundsForm);
-
-QPushButton* transferBtn = new QPushButton("Transfer Now");
-transferBtn->setStyleSheet("background-color: #0078D7; color: white; border-radius: 8px; padding: 8px 16px; font-weight: bold;");
-QLabel* transferStatus = new QLabel();
-transferStatus->setStyleSheet("font-size: 14px; color: #cccccc;");
-fundsLayout->addWidget(transferBtn);
-fundsLayout->addWidget(transferStatus);
+QLabel* transferFundsStatus = new QLabel();
+transferFundsLayout->addWidget(transferFundsStatus);
 
 QPushButton* backFunds = new QPushButton("← Back");
-backFunds->setStyleSheet("background-color: #0078D7; color: white; border-radius: 8px; padding: 8px 16px;");
-fundsLayout->addWidget(backFunds);
+backFunds->setFixedHeight(35);
+backFunds->setStyleSheet("background-color: #333333; color: white; border-radius: 6px;");
+transferFundsLayout->addWidget(backFunds);
 
-QObject::connect(backFunds, &QPushButton::clicked, [=]() {
-    transferStack->setCurrentIndex(0);
-    });
-
-// Transfer logic
-QObject::connect(transferBtn, &QPushButton::clicked, [=]() {
-    QString from = fromAccount->currentText();
-    QString to = toAccount->currentText();
-    QString amount = amountField->text().trimmed();
+connect(confirmFundsTransferBtn, &QPushButton::clicked, [=]() {
+    QString from = transferFromAccount->currentText();
+    QString to = transferToAccount->currentText();
+    QString amt = transferFundsAmount->text().trimmed();
 
     if (from == to) {
-        transferStatus->setText("⚠️ Source and destination accounts cannot be the same.");
-        transferStatus->setStyleSheet("font-size: 14px; color: #ff6666;");
-        return;
+        transferFundsStatus->setText("⚠️ Cannot transfer to the same account.");
+        transferFundsStatus->setStyleSheet("color: #ff6666;");
     }
-
-    if (amount.isEmpty() || amount.toDouble() <= 0) {
-        transferStatus->setText("⚠️ Please enter a valid transfer amount.");
-        transferStatus->setStyleSheet("font-size: 14px; color: #ff6666;");
-        return;
+    else if (amt.isEmpty() || amt.toDouble() <= 0) {
+        transferFundsStatus->setText("⚠️ Invalid transfer amount.");
+        transferFundsStatus->setStyleSheet("color: #ff6666;");
     }
-
-    transferStatus->setText(QString("✅ Successfully transferred $%1 from %2 to %3.")
-        .arg(amount, from, to));
-    transferStatus->setStyleSheet("font-size: 14px; color: #00cc66; font-weight: bold;");
+    else {
+        transferFundsStatus->setText(QString("✅ Transferred $%1 from %2 to %3.")
+            .arg(amt).arg(from, to));
+        transferFundsStatus->setStyleSheet("color: #00cc66; font-weight: bold;");
+    }
     });
-transferStack->addWidget(fundsPage);
+connect(backFunds, &QPushButton::clicked, [=]() { transferStack->setCurrentIndex(0); });
+transferStack->addWidget(transferFundsPage); // Page 1
 
-// ---------------------------------------------------------
-// E-DEPOSIT PAGE (with photo upload)
-// ---------------------------------------------------------
+// ========================= BILL PAYMENTS PAGE =========================
+QWidget* transferBillPaymentsPage = new QWidget();
+QVBoxLayout* transferBillPaymentsLayout = new QVBoxLayout(transferBillPaymentsPage);
+transferBillPaymentsLayout->setContentsMargins(40, 30, 40, 30);
+transferBillPaymentsLayout->setSpacing(15);
+
+QLabel* transferBillPaymentsHeader = new QLabel("Bill Payments");
+transferBillPaymentsHeader->setStyleSheet("font-size: 22px; font-weight: bold; color: white;");
+transferBillPaymentsLayout->addWidget(transferBillPaymentsHeader);
+
+QFormLayout* transferBillPaymentsForm = new QFormLayout();
+QComboBox* transferBillPayee = new QComboBox();
+transferBillPayee->addItems({ "Hydro One", "Bell Canada", "Rogers", "Water Utility", "Property Tax" });
+
+QLineEdit* transferBillAmount = new QLineEdit();
+transferBillAmount->setPlaceholderText("Amount ($)");
+QComboBox* transferBillFrequency = new QComboBox();
+transferBillFrequency->addItems({ "One-time", "Weekly", "Monthly", "Quarterly" });
+
+transferBillPaymentsForm->addRow("Payee:", transferBillPayee);
+transferBillPaymentsForm->addRow("Amount ($):", transferBillAmount);
+transferBillPaymentsForm->addRow("Frequency:", transferBillFrequency);
+transferBillPaymentsLayout->addLayout(transferBillPaymentsForm);
+
+QPushButton* transferBillPayBtn = new QPushButton("Make Payment");
+transferBillPayBtn->setFixedHeight(40);
+transferBillPayBtn->setStyleSheet("background-color: #0078D7; color: white; font-weight: bold; border-radius: 6px;");
+QLabel* transferBillStatus = new QLabel();
+transferBillPaymentsLayout->addWidget(transferBillPayBtn);
+transferBillPaymentsLayout->addWidget(transferBillStatus);
+
+QPushButton* transferBillBackBtn = new QPushButton("← Back");
+transferBillBackBtn->setFixedHeight(35);
+transferBillBackBtn->setStyleSheet("background-color: #333333; color: white; border-radius: 6px;");
+transferBillPaymentsLayout->addWidget(transferBillBackBtn);
+
+connect(transferBillPayBtn, &QPushButton::clicked, [=]() {
+    QString payee = transferBillPayee->currentText();
+    QString amt = transferBillAmount->text().trimmed();
+    QString freq = transferBillFrequency->currentText();
+
+    if (amt.isEmpty() || amt.toDouble() <= 0) {
+        transferBillStatus->setText("⚠️ Invalid amount.");
+        transferBillStatus->setStyleSheet("color: #ff6666;");
+    }
+    else {
+        transferBillStatus->setText(QString("✅ $%1 payment to %2 (%3).")
+            .arg(amt, payee, freq));
+        transferBillStatus->setStyleSheet("color: #00cc66; font-weight: bold;");
+    }
+    });
+connect(transferBillBackBtn, &QPushButton::clicked, [=]() { transferStack->setCurrentIndex(0); });
+transferStack->addWidget(transferBillPaymentsPage); // Page 2
+
+// ========================= eDEPOSIT PAGE =========================
 QWidget* transferEDepositPage = new QWidget();
-QVBoxLayout* eDepositLayout = new QVBoxLayout(transferEDepositPage);
-eDepositLayout->setContentsMargins(40, 30, 40, 30);
-eDepositLayout->setSpacing(15);
+QVBoxLayout* transferEDepositLayout = new QVBoxLayout(transferEDepositPage);
+transferEDepositLayout->setContentsMargins(40, 30, 40, 30);
+transferEDepositLayout->setSpacing(15);
 
-QLabel* eDepositHeader = new QLabel("eDeposit");
-eDepositHeader->setStyleSheet("font-size: 22px; font-weight: bold; color: white;");
-eDepositLayout->addWidget(eDepositHeader);
+QLabel* transferEDepositHeader = new QLabel("eDeposit a Cheque");
+transferEDepositHeader->setStyleSheet("font-size: 22px; font-weight: bold; color: white;");
+transferEDepositLayout->addWidget(transferEDepositHeader);
 
-QFormLayout* eDepositForm = new QFormLayout();
-QLineEdit* payeeField = new QLineEdit();
-QLineEdit* eDepositAmountField = new QLineEdit();
-QLineEdit* chequeNumField = new QLineEdit();
-QComboBox* accountSelect = new QComboBox();
-accountSelect->addItems({ "Chequing - 123456789", "Savings - 987654321" });
+QFormLayout* transferEDepositForm = new QFormLayout();
+QLineEdit* depositChequeNumber = new QLineEdit();
+QLineEdit* depositAmount = new QLineEdit();
+depositChequeNumber->setPlaceholderText("Cheque Number");
+depositAmount->setPlaceholderText("Amount ($)");
+transferEDepositForm->addRow("Cheque Number:", depositChequeNumber);
+transferEDepositForm->addRow("Amount:", depositAmount);
+transferEDepositLayout->addLayout(transferEDepositForm);
 
-payeeField->setPlaceholderText("Enter payee name");
-eDepositAmountField->setPlaceholderText("Enter cheque amount");
-chequeNumField->setPlaceholderText("Enter cheque number");
+QPushButton* uploadFrontBtn = new QPushButton("Upload Front Photo");
+QPushButton* uploadBackBtn = new QPushButton("Upload Back Photo");
+transferEDepositLayout->addWidget(uploadFrontBtn);
+transferEDepositLayout->addWidget(uploadBackBtn);
 
-eDepositForm->addRow("Payee Name:", payeeField);
-eDepositForm->addRow("Amount ($):", eDepositAmountField);
-eDepositForm->addRow("Cheque Number:", chequeNumField);
-eDepositForm->addRow("Deposit To:", accountSelect);
-eDepositLayout->addLayout(eDepositForm);
+QLabel* depositStatus = new QLabel();
+transferEDepositLayout->addWidget(depositStatus);
 
-QHBoxLayout* photosLayout = new QHBoxLayout();
-QLabel* frontPreview = new QLabel("Front of Cheque");
-QLabel* backPreview = new QLabel("Back of Cheque");
-for (QLabel* label : { frontPreview, backPreview }) {
-    label->setFixedSize(160, 100);
-    label->setAlignment(Qt::AlignCenter);
-    label->setStyleSheet("background-color: #333333; color: #bbbbbb; border: 1px solid #777777; border-radius: 6px;");
-}
-photosLayout->addWidget(frontPreview);
-photosLayout->addWidget(backPreview);
-eDepositLayout->addLayout(photosLayout);
+QPushButton* depositSubmitBtn = new QPushButton("Submit Deposit");
+depositSubmitBtn->setFixedHeight(40);
+depositSubmitBtn->setStyleSheet("background-color: #0078D7; color: white; font-weight: bold; border-radius: 6px;");
+transferEDepositLayout->addWidget(depositSubmitBtn);
 
-QHBoxLayout* photoButtons = new QHBoxLayout();
-QPushButton* uploadFront = new QPushButton("Upload Front");
-QPushButton* uploadBack = new QPushButton("Upload Back");
-photoButtons->addWidget(uploadFront);
-photoButtons->addWidget(uploadBack);
-eDepositLayout->addLayout(photoButtons);
+QPushButton* backEDeposit = new QPushButton("← Back");
+backEDeposit->setFixedHeight(35);
+backEDeposit->setStyleSheet("background-color: #333333; color: white; border-radius: 6px;");
+transferEDepositLayout->addWidget(backEDeposit);
 
-QPushButton* depositBtn = new QPushButton("Deposit Cheque");
-depositBtn->setStyleSheet("background-color: #0078D7; color: white; border-radius: 8px; padding: 8px 16px; font-weight: bold;");
-QLabel* statusLabel = new QLabel("");
-statusLabel->setStyleSheet("font-size: 14px; color: #cccccc; font-weight: bold;");
-eDepositLayout->addWidget(depositBtn);
-eDepositLayout->addWidget(statusLabel);
+connect(depositSubmitBtn, &QPushButton::clicked, [=]() {
+    QString cheque = depositChequeNumber->text().trimmed();
+    QString amt = depositAmount->text().trimmed();
 
-// Upload logic
-connect(uploadFront, &QPushButton::clicked, [=]() {
-    QString filePath = QFileDialog::getOpenFileName(nullptr, "Upload Front of Cheque", "", "Images (*.png *.jpg *.jpeg)");
-    if (!filePath.isEmpty()) {
-        QPixmap pix(filePath);
-        frontPreview->setPixmap(pix.scaled(frontPreview->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-        frontPreview->setText("");
+    if (cheque.isEmpty() || amt.isEmpty()) {
+        depositStatus->setText("⚠️ Please fill in all cheque details.");
+        depositStatus->setStyleSheet("color: #ff6666;");
+    }
+    else {
+        depositStatus->setText(QString("✅ Cheque #%1 deposited for $%2.").arg(cheque, amt));
+        depositStatus->setStyleSheet("color: #00cc66; font-weight: bold;");
     }
     });
-connect(uploadBack, &QPushButton::clicked, [=]() {
-    QString filePath = QFileDialog::getOpenFileName(nullptr, "Upload Back of Cheque", "", "Images (*.png *.jpg *.jpeg)");
-    if (!filePath.isEmpty()) {
-        QPixmap pix(filePath);
-        backPreview->setPixmap(pix.scaled(backPreview->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-        backPreview->setText("");
-    }
-    });
+connect(backEDeposit, &QPushButton::clicked, [=]() { transferStack->setCurrentIndex(0); });
+transferStack->addWidget(transferEDepositPage); // Page 3
 
-connect(depositBtn, &QPushButton::clicked, [=]() {
-    QString payee = payeeField->text().trimmed();
-    QString amount = eDepositAmountField->text().trimmed();
-    QString chequeNum = chequeNumField->text().trimmed();
-    QString account = accountSelect->currentText();
+// ========================= CONNECTIONS (Main Menu Navigation) =========================
+connect(btnFunds, &QPushButton::clicked, [=]() { transferStack->setCurrentIndex(1); });
+connect(btnBills, &QPushButton::clicked, [=]() { transferStack->setCurrentIndex(2); });
+connect(btnEDeposit, &QPushButton::clicked, [=]() { transferStack->setCurrentIndex(3); });
 
-    bool hasFront = !frontPreview->pixmap().isNull();
-    bool hasBack = !backPreview->pixmap().isNull();
-
-    if (payee.isEmpty() || amount.isEmpty() || chequeNum.isEmpty()) {
-        statusLabel->setText("⚠️ Please fill out all cheque details before depositing.");
-        statusLabel->setStyleSheet("font-size: 14px; color: #ff6666; font-weight: bold;");
-        return;
-    }
-
-    if (!hasFront || !hasBack) {
-        statusLabel->setText("⚠️ Please upload photos of both sides of the cheque.");
-        statusLabel->setStyleSheet("font-size: 14px; color: #ff6666; font-weight: bold;");
-        return;
-    }
-
-    statusLabel->setText(QString("✅ Cheque #%1 for $%2 deposited to %3 successfully.")
-        .arg(chequeNum, amount, account));
-    statusLabel->setStyleSheet("font-size: 14px; color: #00cc66; font-weight: bold;");
-    });
-
-QPushButton* backEdeposit = new QPushButton("← Back");
-backEdeposit->setStyleSheet(
-    "QPushButton { background-color: #0078D7; color: white; border-radius: 8px; padding: 8px 16px; }"
-    "QPushButton:hover { background-color: #005fa3; }"
-);
-connect(backEdeposit, &QPushButton::clicked, [=]() { transferStack->setCurrentIndex(0); });
-eDepositLayout->addWidget(backEdeposit);
-
-transferStack->addWidget(transferEDepositPage);
-
-// ---------------------------------------------------------
-// CONNECTIONS (MAIN MENU → SUBPAGES)
-// ---------------------------------------------------------
-connect(btnInterac, &QPushButton::clicked, [=]() { transferStack->setCurrentWidget(transferInteracPage); });
-connect(btnTransferFunds, &QPushButton::clicked, [=]() { transferStack->setCurrentWidget(fundsPage); });
-connect(btnBillPayments, &QPushButton::clicked, [=]() { transferStack->setCurrentWidget(transferBillPaymentsPage); });
-connect(btnEDeposit, &QPushButton::clicked, [=]() { transferStack->setCurrentWidget(transferEDepositPage); });
-connect(btnManageTx, &QPushButton::clicked, [=]() { transferStack->setCurrentWidget(transferManageTxPage); });
-connect(btnInvesting, &QPushButton::clicked, [=]() { transferStack->setCurrentWidget(transferInvestingPage); });
-connect(btnTFSAContrib, &QPushButton::clicked, [=]() { transferStack->setCurrentWidget(transferTFSAContribPage); });
-connect(btnTFSAWithdraw, &QPushButton::clicked, [=]() { transferStack->setCurrentWidget(transferTFSAWithdrawPage); });
-
-// Finally, add Transfers view to the main stack
+// Add transfers view to main stack
 contentStack->addWidget(transfersView);
-
 #pragma endregion
 
 
