@@ -17,6 +17,7 @@
 #include < QTableWidgetItem>
 #include <iostream>
 #include <QHeaderView>
+#include <QTimer>
 
 
 BankingWindow::BankingWindow(QWidget* parent) : QWidget(parent),
@@ -678,7 +679,7 @@ void BankingWindow::setupViews() {
 
     billsLayout->addLayout(btnColumn);
 
-    // ✅ Now your new Scheduled Payments Box code
+    // Now your new Scheduled Payments Box code
     // --- Scheduled Payments Box (styled like Budget) ---
     QGroupBox* scheduledBox = new QGroupBox("Scheduled Payments");
     scheduledBox->setStyleSheet(
@@ -966,93 +967,193 @@ void BankingWindow::setupViews() {
 
 #pragma endregion
 
-
-/*#pragma region <More View>
-    moreView = new QWidget();
-    QVBoxLayout* moreLayout = new QVBoxLayout(moreView);
-    moreLayout->addWidget(new QLabel("More Options View"));
-    moreLayout->addWidget(new QLabel("Additional features will go here"));
-    contentStack->addWidget(moreView);
-#pragma endregion*/
 #pragma region <More View>
     moreView = new QWidget();
     QVBoxLayout* moreLayout = new QVBoxLayout(moreView);
     moreLayout->setAlignment(Qt::AlignTop);
     moreLayout->setContentsMargins(40, 40, 40, 40);
-    moreLayout->setSpacing(25);
+    moreLayout->setSpacing(15);
 
-    // --- Header Label ---
     QLabel* moreHeader = new QLabel("More Options");
-    moreHeader->setStyleSheet(
-        "font-size: 22px; font-weight: bold; color: white; margin-bottom: 20px;"
-    );
+    moreHeader->setStyleSheet("font-size: 22px; font-weight: bold; color: white; margin-bottom: 10px;");
     moreLayout->addWidget(moreHeader);
 
-    // Renamed variable to avoid redefinition
+    // Button style
     QString moreButtonStyle =
         "QPushButton {"
         "  background-color: white;"
         "  color: black;"
         "  border: 1px solid #cccccc;"
-        "  border-radius: 10px;"
+        "  border-radius: 8px;"
         "  font-size: 14px;"
         "  font-weight: bold;"
-        "  padding: 15px 20px;"
-        "  text-align: left;"
+        "  padding: 12px;"
         "}"
-        "QPushButton:hover {"
-        "  background-color: #f5f5f5;"
-        "  border: 1px solid #0078D7;"
-        "}"
-        "QPushButton:pressed {"
-        "  background-color: #e6e6e6;"
-        "}";
+        "QPushButton:hover { background-color: #f0f0f0; border: 1px solid #0078D7; }"
+        "QPushButton:pressed { background-color: #e6e6e6; }";
 
-    // Create the buttons
+    // Create buttons
     QPushButton* productsBtn = new QPushButton("Products and Services");
-    QPushButton* aboutAppBtn = new QPushButton("Get to Know the App");
+    QPushButton* appInfoBtn = new QPushButton("Get to Know the App");
     QPushButton* contactBtn = new QPushButton("Contact Us");
     QPushButton* faqBtn = new QPushButton("FAQ");
     QPushButton* privacyBtn = new QPushButton("Privacy and Legal");
-    QPushButton* signoutBtn = new QPushButton("Sign Out");
+    QPushButton* signOutBtn = new QPushButton("Sign Out");
 
-    // Apply style and add to layout
-    for (auto btn : { productsBtn, aboutAppBtn,
-                      contactBtn, faqBtn, privacyBtn, signoutBtn }) {
+    // Apply styling & layout
+    for (auto btn : { productsBtn, appInfoBtn, contactBtn, faqBtn, privacyBtn, signOutBtn }) {
         btn->setStyleSheet(moreButtonStyle);
-        btn->setMinimumHeight(50);
+        btn->setFixedHeight(50);
         btn->setCursor(Qt::PointingHandCursor);
         moreLayout->addWidget(btn);
     }
 
-    // Special styling for Sign Out button
-    signoutBtn->setStyleSheet(
-        "QPushButton {"
-        "  background-color: #ff4c4c;"
-        "  color: white;"
-        "  border: none;"
-        "  border-radius: 10px;"
-        "  font-size: 14px;"
-        "  font-weight: bold;"
-        "  padding: 15px 20px;"
-        "}"
-        "QPushButton:hover { background-color: #e04343; }"
-        "QPushButton:pressed { background-color: #c93737; }"
-    );
-
     contentStack->addWidget(moreView);
+
+    // ------------------------------------
+    // Helper to create sub-pages
+    // ------------------------------------
+    auto createSimplePage = [&](const QString& title, const QString& contentText) {
+        QWidget* page = new QWidget();
+        QVBoxLayout* layout = new QVBoxLayout(page);
+        layout->setContentsMargins(40, 20, 40, 20);  // less top margin
+        layout->setSpacing(10);
+        layout->setAlignment(Qt::AlignTop);
+
+        QLabel* header = new QLabel(title);
+        header->setStyleSheet("font-size: 22px; font-weight: bold; color: white;");
+        layout->addWidget(header);
+
+        QLabel* content = new QLabel(contentText);
+        content->setWordWrap(true);
+        content->setStyleSheet("font-size: 14px; color: #cccccc; line-height: 1.4;");
+        layout->addWidget(content);
+
+        QPushButton* backBtn = new QPushButton("← Back");
+        backBtn->setStyleSheet(
+            "QPushButton { background-color: #0078D7; color: white; border-radius: 8px; padding: 8px 16px; }"
+            "QPushButton:hover { background-color: #005fa3; }"
+        );
+        layout->addWidget(backBtn);
+
+        connect(backBtn, &QPushButton::clicked, [=]() {
+            contentStack->setCurrentWidget(moreView);
+            });
+
+        contentStack->addWidget(page);
+        return page;
+        };
+
+    // ------------------------------------
+    // Actual Page Content
+    // ------------------------------------
+
+    // Products & Services
+    QString productsText =
+        "At GSBS, we’re committed to providing a diverse portfolio of financial products and services "
+        "that empower you to take control of your financial future.\n\n"
+        "• Chequing Accounts – Manage your daily transactions with ease, no hidden fees, and instant e-Transfers.\n"
+        "• Savings Accounts – Earn competitive interest rates while maintaining flexible access to your funds.\n"
+        "• Credit Solutions – From personal loans to low-interest credit cards, our lending products are designed "
+        "to help you achieve your goals responsibly.\n"
+        "• Investments – Explore GICs, mutual funds, and long-term savings tools that match your financial ambitions.\n"
+        "• Business Banking – Open business accounts, manage payroll, and streamline payments with enterprise-grade security.\n\n"
+        "Our mission is simple: to deliver safe, transparent, and innovative banking options for individuals and businesses "
+        "across Greater Sudbury and beyond.";
+
+    // Get to Know the App
+    QString appInfoText =
+        "Welcome to the GSBS (Greater Sudbury Banking Service) application, your trusted partner in everyday banking.\n\n"
+        "Designed for speed, security, and simplicity, our platform gives you the flexibility to bank anywhere, anytime. "
+        "Whether you’re transferring money, paying bills, or setting financial goals, GSBS ensures that every transaction "
+        "is secure and intuitive.\n\n"
+        "• Manage multiple accounts and view balances in real time.\n"
+        "• Make instant payments and transfers with Interac e-Transfer.\n"
+        "• Track monthly budgets, spending habits, and personalized savings goals.\n"
+        "• Access smart insights and tailored advice to help you plan ahead.\n"
+        "• Enable biometric sign-in for faster, safer authentication.\n\n"
+        "Our design philosophy is guided by three principles: accessibility, reliability, and trust. "
+        "We continue to evolve with new features based on user feedback to make your banking experience seamless.";
+
+    // Contact Us
+    QString contactText =
+        "Need assistance? Our dedicated support team is always ready to help.\n\n"
+        "Phone: 705-671-7171 (Mon–Fri, 9 AM – 5 PM EST)\n"
+        "Email: support@gsbsbank.ca\n"
+        "Address: 123 Elm Street, Sudbury ON P3E 1B5\n\n"
+        "You can also visit our Help Centre within the app for step-by-step guides, troubleshooting, "
+        "and live chat support.\n\n"
+        "We value your time and strive to respond to all messages within 24 hours. "
+        "Your feedback directly shapes how we improve GSBS. Thank you for helping us serve you better!";
+
+    // FAQ (clean plain text version)
+    QString faqText =
+        "How do I reset my password?\n"
+        "Go to the Sign-In page, click 'Forgot Password?', and follow the recovery steps. "
+        "A verification link will be sent to your registered email address.\n\n"
+        "Can I open new accounts online?\n"
+        "Yes, you can open chequing, savings, or credit accounts from the 'Accounts' tab in just a few clicks.\n\n"
+        "Is GSBS secure?\n"
+        "Absolutely. We use industry-standard AES-256 encryption, multi-factor authentication, "
+        "and real-time fraud detection to protect your financial data.\n\n"
+        "Can I access my account abroad?\n"
+        "Yes, GSBS Online works internationally wherever internet access is available. "
+        "Be sure to enable two-factor authentication for additional security.\n\n"
+        "How can I contact support?\n"
+        "You can use the 'Contact Us' section in the app or call 705-671-7171 for immediate assistance.";
+
+    // Privacy & Legal
+    QString privacyText =
+        "At GSBS, your privacy is not just a policy. It’s a promise.\n\n"
+        "We comply with Canada’s Personal Information Protection and Electronic Documents Act (PIPEDA) "
+        "and adhere to strict internal safeguards that protect your personal and financial data.\n\n"
+        "We never sell, rent, or share your information with unauthorized third parties. "
+        "All data is encrypted at rest and in transit, stored on secure Canadian servers.\n\n"
+        "By using GSBS services, you agree to our Terms of Use and Privacy Policy. "
+        "We encourage all users to review these policies regularly as we update them to reflect "
+        "new technologies and best practices.\n\n"
+        "If you have any privacy-related inquiries, please reach out to privacy@gsbsbank.ca.";
+
+    // Sign Out
+    QString signOutText =
+        "You have been signed out successfully.\n\n"
+        "For your security, please close the application or log out of your account completely "
+        "if you’re using a shared or public computer.\n\n"
+        "To access your accounts again, simply return to the Home page and log in using your credentials.";
+
+    // ------------------------------------
+    // Create Pages
+    // ------------------------------------
+    QWidget* productsPage = createSimplePage("Products and Services", productsText);
+    QWidget* appInfoPage = createSimplePage("Get to Know the App", appInfoText);
+    QWidget* contactPage = createSimplePage("Contact Us", contactText);
+    QWidget* faqPage = createSimplePage("Frequently Asked Questions (FAQ)", faqText);
+    QWidget* privacyPage = createSimplePage("Privacy and Legal", privacyText);
+    QWidget* signOutPage = createSimplePage("Sign Out", signOutText);
+
+    // ------------------------------------
+    // Connect Buttons to Pages
+    // ------------------------------------
+    connect(productsBtn, &QPushButton::clicked, [=]() { contentStack->setCurrentWidget(productsPage); });
+    connect(appInfoBtn, &QPushButton::clicked, [=]() { contentStack->setCurrentWidget(appInfoPage); });
+    connect(contactBtn, &QPushButton::clicked, [=]() { contentStack->setCurrentWidget(contactPage); });
+    connect(faqBtn, &QPushButton::clicked, [=]() { contentStack->setCurrentWidget(faqPage); });
+    connect(privacyBtn, &QPushButton::clicked, [=]() { contentStack->setCurrentWidget(privacyPage); });
+
+    // ✅ Functional Sign Out (auto return to Home)
+    connect(signOutBtn, &QPushButton::clicked, [=]() {
+        contentStack->setCurrentWidget(signOutPage);
+        qDebug() << "User signed out.";
+
+        // Automatically return to home view after 2 seconds
+        QTimer::singleShot(2000, [=]() {
+            contentStack->setCurrentIndex(0);  // 0 = Home
+            });
+        });
+
 #pragma endregion
 
 
-
-#pragma region <Profile View>
-    profileView = new QWidget();
-    QVBoxLayout* profileLayout = new QVBoxLayout(profileView);
-    profileLayout->addWidget(new QLabel("Profile Settings"));
-	QString nameLabel = QString::fromStdString(currentUser.name());    
-    profileLayout->addWidget(new QLabel(nameLabel));
-    contentStack->addWidget(profileView);
-#pragma endregion
 }
 
 void BankingWindow::setCurrentView(int index) {

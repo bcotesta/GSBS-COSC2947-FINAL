@@ -14,7 +14,7 @@
 #include <QProgressBar>
 #include < QTableWidgetItem>
 #include <QHeaderView>
-
+#include <QTimer>
 
 class BankingWindow : public QWidget {
     Q_OBJECT
