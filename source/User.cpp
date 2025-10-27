@@ -14,9 +14,22 @@ User::User(string n, string e, string p, string ph):
 // Add a new method:
 void User::saveToDatabase() {
 	databasemanager& db = databasemanager::getInstance();
+	
+	// Insert user info into userinfo table
 	std::string tb = "userinfo (name,email,phone, password)";
 	std::string ts = "('" + name_ + "', '" + email_ + "', '" + phone_ + "', '" + passwordHash_ + "')";
 	db.addtoTable(tb, ts);
+	
+	// Get the userID that was just created
+	std::string whereClause = "email = '" + email_ + "'";
+	std::string userID = std::string(db.retStringW("userID", "userinfo", whereClause, "userID").c_str());
+	
+	// Create user-specific tables for accounts and transactions
+	if (!userID.empty()) {
+		db.createUserAccountsTable(userID, name_);
+		db.createUserTransactionsTable(userID, name_);
+		std::cout << "Created user-specific tables for user: " << name_ << " (ID: " << userID << ")" << std::endl;
+	}
 }
 
 int User::userId() const
@@ -66,7 +79,6 @@ void User::updateProfile(string id,string n, string e, string p, string ph)
 	std::string setc = "name = " + n + ", email + " + e + ", phone = " + ph + ", password = " + p;
 	std::string cond = " userID = " + id;
 	db.updateTable(tb, setc, cond);
-
 }
 // Note: address_ is not updated as it's not passed in the parameters
 

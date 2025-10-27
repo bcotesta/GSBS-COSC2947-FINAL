@@ -9,6 +9,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <algorithm> // For std::remove
 
 // Singleton instance getter
 databasemanager& databasemanager::getInstance() {
@@ -104,6 +105,67 @@ void databasemanager::createTransactionTb(std::string accnID, std::string tID)
     }
     catch (sql::SQLException& e) {
         std::cerr << "SQL Error in createTransactionTb: " << e.what() << std::endl;
+    }
+}
+
+void databasemanager::createUserAccountsTable(std::string userID, std::string username)
+{
+    try {
+        ensureConnection();
+        
+        // Remove spaces and special characters from username for table name
+        std::string cleanUsername = username;
+        cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), ' '), cleanUsername.end());
+        cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), '-'), cleanUsername.end());
+        cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), '.'), cleanUsername.end());
+        
+        // Create table name: userID_username_acc
+        std::string tableName = userID + "_" + cleanUsername + "_acc";
+        
+        // Create table with account details
+        std::string statement = ctable + tableName + 
+            " (accountNumber VARCHAR(50) PRIMARY KEY, " +
+            "accountType VARCHAR(20) NOT NULL, " +
+            "balance DECIMAL(15,2) NOT NULL DEFAULT 0.00, " +
+            "createdDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)";
+        
+        stmt->execute(statement);
+        std::cout << "User accounts table created successfully: " << tableName << std::endl;
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error in createUserAccountsTable: " << e.what() << std::endl;
+    }
+}
+
+void databasemanager::createUserTransactionsTable(std::string userID, std::string username)
+{
+    try {
+        ensureConnection();
+        
+        // Remove spaces and special characters from username for table name
+        std::string cleanUsername = username;
+        cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), ' '), cleanUsername.end());
+        cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), '-'), cleanUsername.end());
+        cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), '.'), cleanUsername.end());
+        
+        // Create table name: userID_username_transactions
+        std::string tableName = userID + "_" + cleanUsername + "_transactions";
+        
+        // Create table with transaction details
+        std::string statement = ctable + tableName + 
+            " (transactionID INT AUTO_INCREMENT PRIMARY KEY, " +
+            "accountNumber VARCHAR(50) NOT NULL, " +
+            "transactionType VARCHAR(20) NOT NULL, " +
+            "amount DECIMAL(15,2) NOT NULL, " +
+            "transactionDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+            "description VARCHAR(255), " +
+            "balanceAfter DECIMAL(15,2) NOT NULL)";
+        
+        stmt->execute(statement);
+        std::cout << "User transactions table created successfully: " << tableName << std::endl;
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error in createUserTransactionsTable: " << e.what() << std::endl;
     }
 }
 

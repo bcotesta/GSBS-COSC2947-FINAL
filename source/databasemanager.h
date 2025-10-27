@@ -38,6 +38,10 @@ public:
 		std::string tab, 
 		std::string whereClause
 	);
+	
+	// New functions for user-specific tables
+	void createUserAccountsTable(std::string userID, std::string username);
+	void createUserTransactionsTable(std::string userID, std::string username);
 
 private:
 	// Private constructor for Singleton
