@@ -42,6 +42,10 @@ public:
 	// New functions for user-specific tables
 	void createUserAccountsTable(std::string userID, std::string username);
 	void createUserTransactionsTable(std::string userID, std::string username);
+	
+	// Functions to add accounts and transactions to user tables
+	void addAccountToUserTable(std::string userID, std::string username, std::string accountNumber, std::string accountType, double balance);
+	void addTransactionToUserTable(std::string userID, std::string username, std::string accountNumber, std::string transactionType, double amount, std::string description, double balanceAfter);
 
 private:
 	// Private constructor for Singleton
@@ -49,6 +53,7 @@ private:
 	~databasemanager();
 	
 	void ensureConnection();
+	std::string getCleanUsername(std::string username);
 	
 	std::string statement;
 	sql::Statement* stmt;

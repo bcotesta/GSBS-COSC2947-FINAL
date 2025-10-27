@@ -1,6 +1,7 @@
 // Brandon Cotesta 10/16/2025
 
 #include "BankingWindow.h"
+#include "databasemanager.h"
 #include <algorithm>
 #include <chrono>
 #include <QLabel>
@@ -17,8 +18,8 @@
 #include <iostream>
 
 BankingWindow::BankingWindow(QWidget* parent) : QWidget(parent),
-    // eventually pull this data from database
-    currentUser(currentUser.name(), currentUser.email(), currentUser.phone(), currentUser.passwordHash()),
+    // TODO: eventually pull this data from database - using test data for now
+    currentUser("John Doe", "john.doe@gsbs.com", "555-1234", "hashedpassword123"),
     currentCustomer(1),
     currentAccount("123456789", AccountType::CHEQUING)
 {
@@ -70,6 +71,19 @@ void BankingWindow::onDeposit() {
     if (ok && dlg.doubleValue() > 0) {
 	    double amount = dlg.doubleValue();
         currentAccount.deposit(amount);
+        
+        // Save transaction to database
+        databasemanager& db = databasemanager::getInstance();
+        db.addTransactionToUserTable(
+            std::to_string(currentCustomer.getUserId()),
+            currentUser.name(),
+            currentAccount.accountNumber(),
+            "DEPOSIT",
+            amount,
+            "Deposit via Banking Window",
+            currentAccount.getBalance()
+        );
+        
         updateCurrentAccountDisplay();
         outputArea->append(QString("Deposited $%1 to account %2")
             .arg(amount, 0, 'f', 2)
@@ -101,6 +115,19 @@ void BankingWindow::onWithdraw() {
 		double amount = dlg.doubleValue();
         if (amount <= currentAccount.getBalance()) {
             currentAccount.withdraw(amount);
+            
+            // Save transaction to database
+            databasemanager& db = databasemanager::getInstance();
+            db.addTransactionToUserTable(
+                std::to_string(currentCustomer.getUserId()),
+                currentUser.name(),
+                currentAccount.accountNumber(),
+                "WITHDRAWAL",
+                amount,
+                "Withdrawal via Banking Window",
+                currentAccount.getBalance()
+            );
+            
             updateCurrentAccountDisplay();
             outputArea->append(QString("Withdrew $%1 from account %2")
                 .arg(amount, 0, 'f', 2)
@@ -169,6 +196,46 @@ void BankingWindow::onTransfer() {
 			double amount = dlg_i.doubleValue();
             try {
                 currentCustomer.transferFunds(currentAccount.accountNumber(), toAccount.toStdString(), amount);
+                
+                // Save transfer transactions to database
+                databasemanager& db = databasemanager::getInstance();
+                // Get updated account balance
+                auto updatedAccountsList = currentCustomer.accounts();
+                auto it = std::find_if(updatedAccountsList.begin(), updatedAccountsList.end(),
+                    [this](const Account& account) {
+                        return account.accountNumber() == currentAccount.accountNumber();
+                    });
+                
+                if (it != updatedAccountsList.end()) {
+                    db.addTransactionToUserTable(
+                        std::to_string(currentCustomer.getUserId()),
+                        currentUser.name(),
+                        currentAccount.accountNumber(),
+                        "TRANSFER_OUT",
+                        amount,
+                        "Transfer to " + toAccount.toStdString(),
+                        it->getBalance()
+                    );
+                }
+                
+                // Record incoming transfer for destination account
+                auto toIt = std::find_if(updatedAccountsList.begin(), updatedAccountsList.end(),
+                    [&toAccount](const Account& account) {
+                        return account.accountNumber() == toAccount.toStdString();
+                    });
+                
+                if (toIt != updatedAccountsList.end()) {
+                    db.addTransactionToUserTable(
+                        std::to_string(currentCustomer.getUserId()),
+                        currentUser.name(),
+                        toAccount.toStdString(),
+                        "TRANSFER_IN",
+                        amount,
+                        "Transfer from " + currentAccount.accountNumber(),
+                        toIt->getBalance()
+                    );
+                }
+                
                 outputArea->append(QString("Transferred $%1 from %2 to %3")
                     .arg(amount, 0, 'f', 2)
                     .arg(QString::fromStdString(currentAccount.accountNumber()))
@@ -229,7 +296,6 @@ void BankingWindow::onMiniStatement() {
 
 // -- onNewAccount --
 // -- Prompts for new account type and creates it, and adds to customer
-// -- this will later work with the database and it's controller
 void BankingWindow::onNewAccount() {
     QStringList accountTypes;
     accountTypes << "Chequing" << "Savings" << "Credit";
@@ -262,6 +328,26 @@ void BankingWindow::onNewAccount() {
         
         Account newAccount(newAccountNumber.toStdString(), accType);
         currentCustomer.addAccount(newAccount);
+        
+        // Save new account to database
+        databasemanager& db = databasemanager::getInstance();
+        
+        // Get user ID and name
+        std::string userIdStr = std::to_string(currentCustomer.getUserId());
+        std::string userName = currentUser.name();
+        
+        // Ensure tables exist (they should already, but this is safe)
+        db.createUserAccountsTable(userIdStr, userName);
+        db.createUserTransactionsTable(userIdStr, userName);
+        
+        // Add the account to the user's account table
+        db.addAccountToUserTable(
+            userIdStr,
+            userName,
+            newAccountNumber.toStdString(),
+            selectedType.toStdString(),
+            0.0
+        );
         
         updateAccountSelector();
         outputArea->append(QString("Created new %1 account: %2").arg(selectedType, newAccountNumber));
@@ -379,10 +465,14 @@ void BankingWindow::setupViews() {
     withdrawBtn = new QPushButton("Withdraw");
     transferBtn = new QPushButton("Transfer");
     
+    // Add the new account button
+    newAccountBtn = new QPushButton("Open New Account");
+    
     homeLayout->addWidget(viewBalanceBtn);
     homeLayout->addWidget(depositBtn);
     homeLayout->addWidget(withdrawBtn);
     homeLayout->addWidget(transferBtn);
+    homeLayout->addWidget(newAccountBtn);
     
     outputArea = new QTextEdit();
     homeLayout->addWidget(outputArea);
@@ -393,6 +483,7 @@ void BankingWindow::setupViews() {
     connect(depositBtn, &QPushButton::clicked, this, &BankingWindow::onDeposit);
     connect(withdrawBtn, &QPushButton::clicked, this, &BankingWindow::onWithdraw);
     connect(transferBtn, &QPushButton::clicked, this, &BankingWindow::onTransfer);
+    connect(newAccountBtn, &QPushButton::clicked, this, &BankingWindow::onNewAccount);
     
     contentStack->addWidget(homeView);
 #pragma endregion
@@ -518,22 +609,57 @@ void BankingWindow::initializeData() {
     currentCustomer.setUser(currentUser);
     currentCustomer.addAccount(currentAccount);
     
-    //welcomeLabel->setText(QString("Welcome, %1!").arg(QString::fromStdString(currentUser.name())));
+    std::cout << "Initialized data for user: " << currentUser.name() 
+              << " (ID: " << currentCustomer.getUserId() << ")" << std::endl;
     
-    //updateAccountSelector();
-    //updateCurrentAccountDisplay();
+    // Don't create tables here - only when user registers or opens a new account
+    // welcomeLabel->setText(QString("Welcome, %1!").arg(QString::fromStdString(currentUser.name())));
+    
+    // updateAccountSelector();
+    // updateCurrentAccountDisplay();
 }
 
 void BankingWindow::updateAccountSelector() {
-    accountSelector->clear();
-    auto accountsList = currentCustomer.accounts();
-    for (const auto& account : accountsList) {
-        QString accountDisplay = QString("%1 (%2)")
-            .arg(QString::fromStdString(account.accountNumber()))
-            .arg(account.accountType() == AccountType::CHEQUING ? "Chequing" : 
-                 account.accountType() == AccountType::SAVINGS ? "Savings" : "Credit");
-        accountSelector->addItem(accountDisplay, QString::fromStdString(account.accountNumber()));
+    // Safely clear and repopulate the account selector
+    if (!accountSelector) {
+        std::cerr << "Error: accountSelector is null" << std::endl;
+        return;
     }
+    
+    // Block signals to prevent triggering onAccountChanged during update
+    accountSelector->blockSignals(true);
+    accountSelector->clear();
+    
+    try {
+        auto accountsList = currentCustomer.accounts();
+        
+        if (accountsList.empty()) {
+            std::cout << "No accounts found for customer" << std::endl;
+            accountSelector->blockSignals(false);
+            return;
+        }
+        
+        for (const auto& account : accountsList) {
+            // IMPORTANT: Make copies of strings to avoid dangling references
+            std::string accNum = account.accountNumber();  // Copy the string
+            AccountType accType = account.accountType();   // Copy the enum
+            
+            QString accountDisplay = QString("%1 (%2)")
+                .arg(QString::fromStdString(accNum))  // Use the copy
+                .arg(accType == AccountType::CHEQUING ? "Chequing" : 
+                     accType == AccountType::SAVINGS ? "Savings" : "Credit");
+            
+            accountSelector->addItem(accountDisplay, QString::fromStdString(accNum));
+        }
+        
+        std::cout << "Updated account selector with " << accountsList.size() << " accounts" << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error updating account selector: " << e.what() << std::endl;
+    }
+    
+    // Re-enable signals
+    accountSelector->blockSignals(false);
 }
 
 void BankingWindow::updateCurrentAccountDisplay() {

@@ -70,6 +70,15 @@ void databasemanager::ensureConnection()
     }
 }
 
+std::string databasemanager::getCleanUsername(std::string username)
+{
+    std::string cleanUsername = username;
+    cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), ' '), cleanUsername.end());
+    cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), '-'), cleanUsername.end());
+    cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), '.'), cleanUsername.end());
+    return cleanUsername;
+}
+
 void databasemanager::createAccount(std::string accN, std::string accT)
 {
     try {
@@ -113,13 +122,7 @@ void databasemanager::createUserAccountsTable(std::string userID, std::string us
     try {
         ensureConnection();
         
-        // Remove spaces and special characters from username for table name
-        std::string cleanUsername = username;
-        cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), ' '), cleanUsername.end());
-        cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), '-'), cleanUsername.end());
-        cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), '.'), cleanUsername.end());
-        
-        // Create table name: userID_username_acc
+        std::string cleanUsername = getCleanUsername(username);
         std::string tableName = userID + "_" + cleanUsername + "_acc";
         
         // Create table with account details
@@ -142,13 +145,7 @@ void databasemanager::createUserTransactionsTable(std::string userID, std::strin
     try {
         ensureConnection();
         
-        // Remove spaces and special characters from username for table name
-        std::string cleanUsername = username;
-        cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), ' '), cleanUsername.end());
-        cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), '-'), cleanUsername.end());
-        cleanUsername.erase(std::remove(cleanUsername.begin(), cleanUsername.end(), '.'), cleanUsername.end());
-        
-        // Create table name: userID_username_transactions
+        std::string cleanUsername = getCleanUsername(username);
         std::string tableName = userID + "_" + cleanUsername + "_transactions";
         
         // Create table with transaction details
@@ -166,6 +163,45 @@ void databasemanager::createUserTransactionsTable(std::string userID, std::strin
     }
     catch (sql::SQLException& e) {
         std::cerr << "SQL Error in createUserTransactionsTable: " << e.what() << std::endl;
+    }
+}
+
+void databasemanager::addAccountToUserTable(std::string userID, std::string username, std::string accountNumber, std::string accountType, double balance)
+{
+    try {
+        ensureConnection();
+        
+        std::string cleanUsername = getCleanUsername(username);
+        std::string tableName = userID + "_" + cleanUsername + "_acc";
+        
+        std::ostringstream valueStream;
+        valueStream << "('" << accountNumber << "', '" << accountType << "', " << balance << ", NOW())";
+        
+        addtoTable(tableName, valueStream.str());
+        std::cout << "Account added to user table: " << accountNumber << std::endl;
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error in addAccountToUserTable: " << e.what() << std::endl;
+    }
+}
+
+void databasemanager::addTransactionToUserTable(std::string userID, std::string username, std::string accountNumber, std::string transactionType, double amount, std::string description, double balanceAfter)
+{
+    try {
+        ensureConnection();
+        
+        std::string cleanUsername = getCleanUsername(username);
+        std::string tableName = userID + "_" + cleanUsername + "_transactions";
+        
+        std::ostringstream valueStream;
+        valueStream << "(NULL, '" << accountNumber << "', '" << transactionType << "', " 
+                    << amount << ", NOW(), '" << description << "', " << balanceAfter << ")";
+        
+        addtoTable(tableName, valueStream.str());
+        std::cout << "Transaction added to user table for account: " << accountNumber << std::endl;
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error in addTransactionToUserTable: " << e.what() << std::endl;
     }
 }
 

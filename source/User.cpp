@@ -7,11 +7,10 @@
 User::User(string n, string e, string p, string ph): 
 	name_(n), email_(e), passwordHash_(p), phone_(ph)
 {
-	// REMOVE the database call from constructor
-	// Move it to a separate saveToDatabase() method that's called explicitly
+	// Constructor should NOT call database - this is now just initialization
 }
 
-// Add a new method:
+// This method should ONLY be called when registering a NEW user
 void User::saveToDatabase() {
 	databasemanager& db = databasemanager::getInstance();
 	
@@ -24,11 +23,11 @@ void User::saveToDatabase() {
 	std::string whereClause = "email = '" + email_ + "'";
 	std::string userID = std::string(db.retStringW("userID", "userinfo", whereClause, "userID").c_str());
 	
-	// Create user-specific tables for accounts and transactions
+	// Create user-specific tables for accounts and transactions ONLY for new users
 	if (!userID.empty()) {
 		db.createUserAccountsTable(userID, name_);
 		db.createUserTransactionsTable(userID, name_);
-		std::cout << "Created user-specific tables for user: " << name_ << " (ID: " << userID << ")" << std::endl;
+		std::cout << "Created user-specific tables for NEW user: " << name_ << " (ID: " << userID << ")" << std::endl;
 	}
 }
 

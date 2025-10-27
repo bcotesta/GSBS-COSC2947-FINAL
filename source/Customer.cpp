@@ -38,9 +38,14 @@ void Customer::removeAccount(const std::string& accountNumber)
     });
 }
 
-std::list<Account> Customer::accounts() const
+std::list<Account>& Customer::accounts()
 {
-	return accounts_;
+    return accounts_;
+}
+
+const std::list<Account>& Customer::accounts() const
+{
+    return accounts_;
 }
 
 std::list<Card> Customer::cards() const
