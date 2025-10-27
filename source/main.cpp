@@ -60,8 +60,8 @@ string switchAccount(Customer& customer) {
 
 void registerNewUser(string user, string pass, string email, string phone) {
 	int id = 2; // This would be generated or retrieved from a database. 
-    User newUser(user, email, phone, pass); // creates a new user with given info
-    newUser.saveToDatabase();  // ← Explicitly save
+    User newUser(user, email, pass, phone);
+    newUser.saveToDatabase();
 }
 
 int main(int argc, char *argv[])
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 
     // Username and Password fields
     QLineEdit* usernameField = new QLineEdit(&loginWindow);
-    usernameField->setPlaceholderText("Username");
+    usernameField->setPlaceholderText("Email");
     usernameField->setGeometry(50, 50, 200, 30);
     usernameField->show();
 
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
         QVBoxLayout* layout = new QVBoxLayout(registerDialog);
     
         // Username field
-        QLabel* usernameLabel = new QLabel("Username:", registerDialog);
+        QLabel* usernameLabel = new QLabel("Full Name:", registerDialog);
         QLineEdit* usernameInput = new QLineEdit(registerDialog);
         layout->addWidget(usernameLabel);
         layout->addWidget(usernameInput);
