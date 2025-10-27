@@ -18,7 +18,7 @@
 
 BankingWindow::BankingWindow(QWidget* parent) : QWidget(parent),
     // eventually pull this data from database
-    currentUser("John Doe", "jd@gmail.com", "reallygoodpassword123", "705-671-7171"),
+    currentUser(currentUser.name(), currentUser.email(), currentUser.phone(), currentUser.passwordHash()),
     currentCustomer(1),
     currentAccount("123456789", AccountType::CHEQUING)
 {

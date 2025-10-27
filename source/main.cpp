@@ -60,12 +60,12 @@ string switchAccount(Customer& customer) {
 
 void registerNewUser(string user, string pass, string email, string phone) {
 	int id = 2; // This would be generated or retrieved from a database. 
-    User newUser(user, pass, email, phone); // creates a new user with given info
+    User newUser(user, email, phone, pass); // creates a new user with given info
 }
 
 int main(int argc, char *argv[])
 {
-
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF);
     QApplication app(argc, argv);
     
     // Authenticator
@@ -118,6 +118,13 @@ int main(int argc, char *argv[])
         QString Qpassword = passwordField->text();
         string uname = Qusername.toStdString();
         string pword = Qpassword.toStdString();
+
+        //sets the validinfo to be compared to using the name and password to 
+        //search the database for matching info
+        auth.setValidInfo(uname, pword);
+
+
+
         if(auth.verifyCredentials(uname, pword)){
             // Close login panel and show banking window
             loginWindow.close();
@@ -232,8 +239,8 @@ int main(int argc, char *argv[])
     registerButton->show();
 
     // -- DEBUGGING --
-    loginWindow.close();
-    bankingWindow->show();
+    //loginWindow.close();
+   // bankingWindow->show();
 
     return app.exec();
 }

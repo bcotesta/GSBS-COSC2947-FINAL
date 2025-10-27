@@ -45,7 +45,7 @@ void Authenticator::setValidInfo(std::string username, std::string password)
 
 bool Authenticator::verifyCredentials(const string& username, const string& password) 
 {
-	return (username == validUsername && password == validPassword);
+	return (username == validUsername_ && password == validPassword_);
 }
 
 void Authenticator::resetPassword(const string& username) 

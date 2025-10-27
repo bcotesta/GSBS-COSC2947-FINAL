@@ -17,5 +17,6 @@ private:
 	string validName_;
 	string validPhone_;
 	string validAddress_;
+	string validAccountNum_;
 };
 

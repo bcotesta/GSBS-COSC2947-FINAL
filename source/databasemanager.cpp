@@ -37,7 +37,7 @@ void databasemanager::createAccount(std::string accN, std::string accT)
 
     try {
         driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://136.114.146.175:3306", "root", "gsbsTeam20$");
+        con = driver->connect("tcp://136.114.146.175:3306", "client", "gsbsTeam20$");
         con->setSchema("bankdatabase");
         cout << "connected";
 
@@ -64,7 +64,7 @@ void databasemanager::createTransactionTb(std::string accnID, std::string tID)
     sql::Connection* con;
     try {
         driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://136.114.146.175:3306", "root", "gsbsTeam20$");
+        con = driver->connect("tcp://136.114.146.175:3306", "client", "gsbsTeam20$");
         con->setSchema("bankdatabase");
         cout << "connected";
         sql::Statement* stmt = con->createStatement();
@@ -87,8 +87,9 @@ void databasemanager::addtoTable(std::string tab, std::string val)
 
     try {
         driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://136.114.146.175:3306", "root", "gsbsTeam20$");
+        con = driver->connect("tcp://136.114.146.175:3306", "client", "gsbsTeam20$");
         con->setSchema("bankdatabase");
+
         cout << "connected";
         sql::Statement* stmt = con->createStatement();
 
@@ -97,7 +98,7 @@ void databasemanager::addtoTable(std::string tab, std::string val)
 
         stmt->execute(statement);
         //execute query - use execute() for INSERT statements
-
+        delete con;
     }
     catch (sql::SQLException& e) {
         std::cerr << "SQL Error: " << e.what() << std::endl;
@@ -116,8 +117,10 @@ sql::SQLString databasemanager::retString(std::string col, std::string tab, std:
 
     try {
         driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://136.114.146.175:3306", "root", "gsbsTeam20$");
+        con = driver->connect("tcp://136.114.146.175:3306", "client", "gsbsTeam20$");
         con->setSchema("bankdatabase");
+
+
         cout << "connected";
         sql::Statement* stmt = con->createStatement();
 
@@ -142,7 +145,7 @@ sql::SQLString databasemanager::retString(std::string col, std::string tab, std:
     catch (sql::SQLException& e) {
         std::cerr << "SQL Error: " << e.what() << std::endl;
     }
-    
+    return tempstring;
  
 }
 
@@ -150,18 +153,36 @@ sql::SQLString databasemanager::retString(std::string col, std::string tab, std:
 sql::SQLString databasemanager::retStringW(std::string col, std::string tab, std::string val, std::string specval)
 { //select statement with where 
     std::string tempstring; 
-    //same comments and functions as retString
-    statement = select + col + " " + from + tab + " " + where + val; 
-    //except here it uses the WHERE statement to give a more specific search
-  
-    sql::ResultSet* res = stmt->executeQuery(statement);
-    //select statement to retrieve data for database
-    if (res->next()) {
-        tempstring = res->getString(specval);
-    }
 
-    delete res;  //clean up result set only
-    // Don't delete stmt - it's a class member
+    sql::mysql::MySQL_Driver* driver;
+    sql::Connection* con;
+
+    try {
+        driver = sql::mysql::get_driver_instance();
+        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
+        con->setSchema("bankdatabase");
+        sql::Statement* stmt = con->createStatement();
+
+
+        //same comments and functions as retString
+        statement = select + col + " " + from + tab + " " + where + val;
+        //except here it uses the WHERE statement to give a more specific search
+
+        sql::ResultSet* res = stmt->executeQuery(statement);
+        //select statement to retrieve data for database
+        if (res->next()) {
+            tempstring = res->getString(specval);
+        }
+
+        delete con;
+        delete stmt;
+        delete res;  //clean up result set only
+        // Don't delete stmt - it's a class member
+
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error: " << e.what() << std::endl;
+    }
   
     return tempstring;
 }
@@ -174,7 +195,7 @@ void databasemanager::updateTable(std::string tab, std::string setv, std::string
 
     try {
         driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://136.114.146.175:3306", "root", "gsbsTeam20$");
+        con = driver->connect("tcp://136.114.146.175:3306", "client", "gsbsTeam20$");
         con->setSchema("bankdatabase");
         cout << "connected";
         sql::Statement* stmt = con->createStatement();
@@ -203,5 +224,5 @@ databasemanager::~databasemanager()
         delete connection;
         connection = nullptr;
     }
-}
+} 
 

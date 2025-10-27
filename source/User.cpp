@@ -9,7 +9,7 @@ User::User(string n, string e, string p, string ph):
 {
 	databasemanager d1;
 	std::string tb = "userinfo (name,email,phone, password)";
-	std::string ts = "(" + n + ", " + e + ", " + ph + ", " + p + ")";
+	std::string ts = "('" + n + "', '" + e + "', '" + ph + "', '" + p + "')";
 	d1.addtoTable(tb, ts);
 	// create user
 }
