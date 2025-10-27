@@ -13,11 +13,10 @@ User::User(string n, string e, string p, string ph):
 // This method should ONLY be called when registering a NEW user
 void User::saveToDatabase() {
 	databasemanager& db = databasemanager::getInstance();
-	
-	// Insert user info into userinfo table
 	std::string tb = "userinfo (name,email,phone, password)";
 	std::string ts = "('" + name_ + "', '" + email_ + "', '" + phone_ + "', '" + passwordHash_ + "')";
 	db.addtoTable(tb, ts);
+<<<<<<< HEAD
 	
 	// Get the userID that was just created
 	std::string whereClause = "email = '" + email_ + "'";
@@ -29,6 +28,8 @@ void User::saveToDatabase() {
 		db.createUserTransactionsTable(userID, name_);
 		std::cout << "Created user-specific tables for NEW user: " << name_ << " (ID: " << userID << ")" << std::endl;
 	}
+=======
+>>>>>>> parent of 864110c (table creation on account registration)
 }
 
 int User::userId() const
@@ -78,6 +79,7 @@ void User::updateProfile(string id,string n, string e, string p, string ph)
 	std::string setc = "name = " + n + ", email + " + e + ", phone = " + ph + ", password = " + p;
 	std::string cond = " userID = " + id;
 	db.updateTable(tb, setc, cond);
+
 }
 // Note: address_ is not updated as it's not passed in the parameters
 

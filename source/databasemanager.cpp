@@ -9,7 +9,6 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <algorithm> // For std::remove
 
 // Singleton instance getter
 databasemanager& databasemanager::getInstance() {
@@ -117,6 +116,7 @@ void databasemanager::createTransactionTb(std::string accnID, std::string tID)
     }
 }
 
+<<<<<<< HEAD
 void databasemanager::createUserAccountsTable(std::string userID, std::string username)
 {
     try {
@@ -205,6 +205,8 @@ void databasemanager::addTransactionToUserTable(std::string userID, std::string 
     }
 }
 
+=======
+>>>>>>> parent of 864110c (table creation on account registration)
 void databasemanager::addtoTable(std::string tab, std::string val)
 {
     try {

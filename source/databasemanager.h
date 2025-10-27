@@ -38,6 +38,7 @@ public:
 		std::string tab, 
 		std::string whereClause
 	);
+<<<<<<< HEAD
 	
 	// New functions for user-specific tables
 	void createUserAccountsTable(std::string userID, std::string username);
@@ -46,6 +47,8 @@ public:
 	// Functions to add accounts and transactions to user tables
 	void addAccountToUserTable(std::string userID, std::string username, std::string accountNumber, std::string accountType, double balance);
 	void addTransactionToUserTable(std::string userID, std::string username, std::string accountNumber, std::string transactionType, double amount, std::string description, double balanceAfter);
+=======
+>>>>>>> parent of 864110c (table creation on account registration)
 
 private:
 	// Private constructor for Singleton
