@@ -98,7 +98,7 @@ void databasemanager::addtoTable(std::string tab, std::string val)
 
         stmt->execute(statement);
         //execute query - use execute() for INSERT statements
-        delete con;
+        
     }
     catch (sql::SQLException& e) {
         std::cerr << "SQL Error: " << e.what() << std::endl;
@@ -136,7 +136,7 @@ sql::SQLString databasemanager::retString(std::string col, std::string tab, std:
             //searches returned statement for the specific value wanted.
         }
 
-        delete res;  //clean up result set only
+        //delete res;  //clean up result set only
         // Don't delete stmt - it's a class member
         return tempstring;
 
@@ -174,8 +174,7 @@ sql::SQLString databasemanager::retStringW(std::string col, std::string tab, std
             tempstring = res->getString(specval);
         }
 
-        delete con;
-        delete stmt;
+       
         delete res;  //clean up result set only
         // Don't delete stmt - it's a class member
 
@@ -216,13 +215,13 @@ void databasemanager::updateTable(std::string tab, std::string setv, std::string
 
 databasemanager::~databasemanager()
 {
-    if (stmt) {
+  if (stmt) {
         delete stmt;
         stmt = nullptr;
     }
     if (connection) {
         delete connection;
         connection = nullptr;
-    }
+    } 
 } 
 
