@@ -11,30 +11,6 @@ using namespace std;
 
 Account::Account(string accountNumber, AccountType accType)
 {
-    //create account using account number
-    // Use Singleton instance
-    databasemanager& db = databasemanager::getInstance();
-
-    std::string accT = "";
-
-    switch (accType)
-    {
-    case AccountType::CHEQUING:
-        accT = "CHEQUING";
-        break;
-    case AccountType::SAVINGS:
-        accT = "SAVINGS";
-        break;
-    case AccountType::CREDIT:
-        accT = "CREDIT";
-        break;
-    case AccountType::LOAN:
-        accT = "LOAN";
-        break;
-    }
-
-    db.createAccount(accountNumber, accT);
-
     accountNumber_ = std::move(accountNumber);
     accountType_ = accType;
     balance_ = 0.0;
@@ -91,3 +67,26 @@ void Account::withdraw(double amount)
 }
 
 double Account::getBalance() const { return balance_; }
+
+void Account::saveToDatabase() {
+    databasemanager& db = databasemanager::getInstance();
+    std::string accT = "";
+
+    switch (accountType_)
+    {
+    case AccountType::CHEQUING:
+        accT = "CHEQUING";
+        break;
+    case AccountType::SAVINGS:
+        accT = "SAVINGS";
+        break;
+    case AccountType::CREDIT:
+        accT = "CREDIT";
+        break;
+    case AccountType::LOAN:
+        accT = "LOAN";
+        break;
+    }
+
+    db.createAccount(accountNumber_, accT);
+}

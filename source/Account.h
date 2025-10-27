@@ -19,6 +19,7 @@ public:
     void deposit(double amount);
     void withdraw(double amount);
     double getBalance() const;
+	void saveToDatabase();
 
 private:
     std::string accountNumber_;

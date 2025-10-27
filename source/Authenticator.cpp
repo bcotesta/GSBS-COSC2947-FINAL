@@ -18,6 +18,12 @@ Authenticator::~Authenticator() {
 //func desc: will use username and password from database to set valid username and password for login
 void Authenticator::setValidInfo(std::string username, std::string password)
 {
+	if (username == "" || password == "") {
+		cout << "\n[WARNING] Authenticator::setValidInfo() - Empty username or password provided!" << std::endl;
+		return;
+	}
+
+
 	std::cout << "\n========================================" << std::endl;
 	std::cout << "  Authenticator::setValidInfo()" << std::endl;
 	std::cout << "========================================" << std::endl;
@@ -92,6 +98,11 @@ void Authenticator::setValidInfo(std::string username, std::string password)
 
 bool Authenticator::verifyCredentials(const string& username, const string& password) 
 {
+	if (username == "" || password == "") {
+		cout << "\n[WARNING] Authenticator::verifyCredentials() - Empty username or password provided!" << std::endl;
+		return false;
+	}
+
 	std::cout << "\n========================================" << std::endl;
 	std::cout << "  Authenticator::verifyCredentials()" << std::endl;
 	std::cout << "========================================" << std::endl;

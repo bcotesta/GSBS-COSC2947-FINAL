@@ -7,12 +7,16 @@
 User::User(string n, string e, string p, string ph): 
 	name_(n), email_(e), passwordHash_(p), phone_(ph)
 {
-	// Use Singleton instance
+	// REMOVE the database call from constructor
+	// Move it to a separate saveToDatabase() method that's called explicitly
+}
+
+// Add a new method:
+void User::saveToDatabase() {
 	databasemanager& db = databasemanager::getInstance();
 	std::string tb = "userinfo (name,email,phone, password)";
-	std::string ts = "('" + n + "', '" + e + "', '" + ph + "', '" + p + "')";
+	std::string ts = "('" + name_ + "', '" + email_ + "', '" + phone_ + "', '" + passwordHash_ + "')";
 	db.addtoTable(tb, ts);
-	// create user
 }
 
 int User::userId() const

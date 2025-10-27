@@ -12,6 +12,7 @@ public:
 	string phone() const;
 	string address() const;
 	string passwordHash() const;
+	void saveToDatabase();
 
 	// functions
 	bool login(string u, string p) const;
