@@ -15,7 +15,7 @@ public:
     const User* getUser() const;
     void setUser(const User& user);
 
-    std::list<Account> accounts() const;
+    const std::list<Account>& accounts() const;  // Return reference, not copy
     std::list<Card> cards() const;
 
     double viewBalance(std::string accountNumber) const;

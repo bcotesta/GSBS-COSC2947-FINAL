@@ -18,9 +18,9 @@
 
 BankingWindow::BankingWindow(QWidget* parent) : QWidget(parent),
     // eventually pull this data from database
-    currentUser(currentUser.name(), currentUser.email(), currentUser.phone(), currentUser.passwordHash()),
+    currentUser("", "", "", ""),
     currentCustomer(1),
-    currentAccount("123456789", AccountType::CHEQUING)
+    currentAccount("", AccountType::CHEQUING)  // Will be set in initializeData
 {
     setupUI();
     initializeData();
@@ -31,7 +31,7 @@ BankingWindow::BankingWindow(QWidget* parent) : QWidget(parent),
 void BankingWindow::onAccountChanged() {
     QString selectedAccountNumber = accountSelector->currentData().toString();
     if (!selectedAccountNumber.isEmpty()) {
-        auto accountsList = currentCustomer.accounts();
+        const auto& accountsList = currentCustomer.accounts();
         auto it = std::find_if(accountsList.begin(), accountsList.end(),
             [&selectedAccountNumber](const Account& account) {
                 return QString::fromStdString(account.accountNumber()) == selectedAccountNumber;
@@ -231,41 +231,42 @@ void BankingWindow::onMiniStatement() {
 // -- Prompts for new account type and creates it, and adds to customer
 // -- this will later work with the database and it's controller
 void BankingWindow::onNewAccount() {
-    QStringList accountTypes;
-    accountTypes << "Chequing" << "Savings" << "Credit";
+    // Create account type buttons
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("New Account");
+    msgBox.setText("Select account type:");
     
-    bool ok = false;
-    // Dialog modal
-    QInputDialog dlg;
-    dlg.setWindowTitle("New Account");
-    dlg.setLabelText("Select account type:");
-    dlg.setInputMode(QInputDialog::TextInput);      // this is unused but needs to be set to prevent errors
-    dlg.setComboBoxItems(accountTypes);
-    dlg.setComboBoxEditable(false);
-
-    dlg.setModal(true);
-
-    dlg.setFixedSize(200, 98);
-    dlg.setParent(this, Qt::Dialog);
+    QPushButton* chequingBtn = msgBox.addButton("Chequing", QMessageBox::ActionRole);
+    QPushButton* savingsBtn = msgBox.addButton("Savings", QMessageBox::ActionRole);
+    QPushButton* creditBtn = msgBox.addButton("Credit", QMessageBox::ActionRole);
+    msgBox.addButton(QMessageBox::Cancel);
     
-	ok = (dlg.exec() == QDialog::Accepted);
-
-    if (ok) {
-		QString selectedType = dlg.textValue();
-        
-        // Generate a simple account number (in real app, this would be from database)
-        QString newAccountNumber = QString::number(123456000 + currentCustomer.accounts().size() + 1);
-        
-        AccountType accType = AccountType::CHEQUING;
-        if (selectedType == "Savings") accType = AccountType::SAVINGS;
-        else if (selectedType == "Credit") accType = AccountType::CREDIT;
-        
-        Account newAccount(newAccountNumber.toStdString(), accType);
-        currentCustomer.addAccount(newAccount);
-        
-        updateAccountSelector();
-        outputArea->append(QString("Created new %1 account: %2").arg(selectedType, newAccountNumber));
+    msgBox.exec();
+    
+    QString selectedType;
+    AccountType accType = AccountType::CHEQUING;
+    
+    if (msgBox.clickedButton() == chequingBtn) {
+        selectedType = "Chequing";
+        accType = AccountType::CHEQUING;
+    } else if (msgBox.clickedButton() == savingsBtn) {
+        selectedType = "Savings";
+        accType = AccountType::SAVINGS;
+    } else if (msgBox.clickedButton() == creditBtn) {
+        selectedType = "Credit";
+        accType = AccountType::CREDIT;
+    } else {
+        return; // User cancelled
     }
+    
+    // Generate a simple account number (in real app, this would be from database)
+    QString newAccountNumber = QString::number(123456000 + currentCustomer.accounts().size() + 1);
+    
+    Account newAccount(newAccountNumber.toStdString(), accType);
+    currentCustomer.addAccount(newAccount);
+    
+    updateAccountSelector();
+    outputArea->append(QString("Created new %1 account: %2").arg(selectedType, newAccountNumber));
 }
 
 // -- setupUI --
@@ -378,11 +379,14 @@ void BankingWindow::setupViews() {
     depositBtn = new QPushButton("Deposit");
     withdrawBtn = new QPushButton("Withdraw");
     transferBtn = new QPushButton("Transfer");
+
+	newAccountBtn = new QPushButton("New Account");
     
     homeLayout->addWidget(viewBalanceBtn);
     homeLayout->addWidget(depositBtn);
     homeLayout->addWidget(withdrawBtn);
     homeLayout->addWidget(transferBtn);
+	homeLayout->addWidget(newAccountBtn);
     
     outputArea = new QTextEdit();
     homeLayout->addWidget(outputArea);
@@ -393,6 +397,7 @@ void BankingWindow::setupViews() {
     connect(depositBtn, &QPushButton::clicked, this, &BankingWindow::onDeposit);
     connect(withdrawBtn, &QPushButton::clicked, this, &BankingWindow::onWithdraw);
     connect(transferBtn, &QPushButton::clicked, this, &BankingWindow::onTransfer);
+	connect(newAccountBtn, &QPushButton::clicked, this, &BankingWindow::onNewAccount);
     
     contentStack->addWidget(homeView);
 #pragma endregion
@@ -516,12 +521,27 @@ void BankingWindow::styleNavigationButton(QPushButton* button) {
 
 void BankingWindow::initializeData() {
     currentCustomer.setUser(currentUser);
-    currentCustomer.addAccount(currentAccount);
     
-    //welcomeLabel->setText(QString("Welcome, %1!").arg(QString::fromStdString(currentUser.name())));
+    // Automatically create a checking account if accounts list is empty
+    if (currentCustomer.accounts().empty()) {
+        // Generate initial account number
+        QString initialAccountNumber = QString::number(123456001);
+        Account initialAccount(initialAccountNumber.toStdString(), AccountType::CHEQUING);
+        currentCustomer.addAccount(initialAccount);
+        currentAccount = initialAccount;
+        
+        if (outputArea) {
+            outputArea->append(QString("Welcome! A new Chequing account has been created for you: %1").arg(initialAccountNumber));
+        }
+    } else {
+        // Use existing account
+        currentCustomer.addAccount(currentAccount);
+    }
     
-    //updateAccountSelector();
-    //updateCurrentAccountDisplay();
+    welcomeLabel->setText(QString("Welcome, %1!").arg(QString::fromStdString(currentUser.name())));
+    
+    updateAccountSelector();
+    updateCurrentAccountDisplay();
 }
 
 void BankingWindow::updateAccountSelector() {
