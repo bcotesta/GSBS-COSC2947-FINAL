@@ -7,10 +7,11 @@
 User::User(string n, string e, string p, string ph): 
 	name_(n), email_(e), passwordHash_(p), phone_(ph)
 {
-	databasemanager d1;
+	// Use Singleton instance
+	databasemanager& db = databasemanager::getInstance();
 	std::string tb = "userinfo (name,email,phone, password)";
 	std::string ts = "('" + n + "', '" + e + "', '" + ph + "', '" + p + "')";
-	d1.addtoTable(tb, ts);
+	db.addtoTable(tb, ts);
 	// create user
 }
 
@@ -50,7 +51,8 @@ void User::logout() const
 }
 void User::updateProfile(string id,string n, string e, string p, string ph)
 {
-	databasemanager d1;
+	// Use Singleton instance
+	databasemanager& db = databasemanager::getInstance();
 	name_ = n;
 	email_ = e;
 	passwordHash_ = p;
@@ -59,7 +61,7 @@ void User::updateProfile(string id,string n, string e, string p, string ph)
 	std::string tb = "userinfo";
 	std::string setc = "name = " + n + ", email + " + e + ", phone = " + ph + ", password = " + p;
 	std::string cond = " userID = " + id;
-	d1.updateTable(tb, setc, cond);
+	db.updateTable(tb, setc, cond);
 
 }
 // Note: address_ is not updated as it's not passed in the parameters

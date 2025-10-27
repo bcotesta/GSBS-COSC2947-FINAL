@@ -116,14 +116,14 @@ int main(int argc, char *argv[])
     QObject::connect(loginButton, &QPushButton::clicked, [&auth, usernameField, passwordField, &loginWindow, bankingWindow]() {
         QString Qusername = usernameField->text();
         QString Qpassword = passwordField->text();
-        string uname = Qusername.toStdString();
-        string pword = Qpassword.toStdString();
+        
+        // Use UTF-8 encoding to prevent corruption of special characters
+        string uname = Qusername.toUtf8().constData();
+        string pword = Qpassword.toUtf8().constData();
 
         //sets the validinfo to be compared to using the name and password to 
         //search the database for matching info
         auth.setValidInfo(uname, pword);
-
-
 
         if(auth.verifyCredentials(uname, pword)){
             // Close login panel and show banking window
@@ -209,6 +209,7 @@ int main(int argc, char *argv[])
 
             if (password.length() < 6) {
 				QMessageBox::warning(registerDialog, "Registration Failed", "Password must be at least 6 characters long.");
+                return;
             }
 
             if (!email.contains("@")) {
@@ -221,8 +222,13 @@ int main(int argc, char *argv[])
 				return;
             }
             
-			// user registration logic
-            registerNewUser(username.toStdString(), password.toStdString(), email.toStdString(), phone.toStdString());
+			// user registration logic - use UTF-8 encoding to prevent corruption
+            registerNewUser(
+                username.toUtf8().constData(), 
+                password.toUtf8().constData(), 
+                email.toUtf8().constData(), 
+                phone.toUtf8().constData()
+            );
             QMessageBox::information(registerDialog, "Success", "User registered successfully!");
             registerDialog->accept();
         });

@@ -12,7 +12,8 @@ using namespace std;
 Account::Account(string accountNumber, AccountType accType)
 {
     //create account using account number
-    databasemanager d1;
+    // Use Singleton instance
+    databasemanager& db = databasemanager::getInstance();
 
     std::string accT = "";
 
@@ -32,10 +33,7 @@ Account::Account(string accountNumber, AccountType accType)
         break;
     }
 
-
-    d1.createAccount(accountNumber, accT);
-    
-
+    db.createAccount(accountNumber, accT);
 
     accountNumber_ = std::move(accountNumber);
     accountType_ = accType;
@@ -56,8 +54,6 @@ void Account::deposit(double amount)
         return;
     }
     balance_ += amount;
-
-    
 
     // Use a more robust ID generation
     static int nextId = 1;

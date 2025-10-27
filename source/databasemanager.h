@@ -1,6 +1,9 @@
 //Everest Ashley SID: 0457240
 // REFACTOR Brandon Cotesta 10/20/2025
 
+#ifndef DATABASEMANAGER_H
+#define DATABASEMANAGER_H
+
 #include <iostream>
 #include <mysql/jdbc.h>
 #include <jdbc/mysql_driver.h>
@@ -8,6 +11,7 @@
 #include <jdbc/cppconn/resultset.h>
 #include <jdbc/cppconn/statement.h>
 #include <string>
+#include <map>
 
 using std::string;
 using namespace std;
@@ -15,45 +19,53 @@ using namespace std;
 class databasemanager
 {
 public:
-	databasemanager(); //connect to database
-	~databasemanager();
+	// Singleton instance access
+	static databasemanager& getInstance();
+	
+	// Delete copy constructor and assignment operator
+	databasemanager(const databasemanager&) = delete;
+	databasemanager& operator=(const databasemanager&) = delete;
 
 //functions
-	//tabn = table name
 	void createAccount(std::string accn, std::string accT);
-
 	void createTransactionTb(std::string accnID, std::string tID);
-
-
 	void addtoTable(std::string tab, std::string val);
-	// (t) table to add a row to, (v) values to insert in ('value1','value2') format 
-	// or "('"+ name + "', '" + email + "')" format with variables
-
 	sql::SQLString retString(std::string col, std::string tab, std::string specval);
-	// select statement without where statement
-  
 	sql::SQLString retStringW(std::string col, std::string tab, std::string val, std::string specval);
-	// (c)column/s to select, (t)table to select from, (v)value to select if using where 
-	// ex select + c + from + t + where + v + ";";
-
 	void updateTable(std::string tab, std::string setv, std::string cond);
-	// ex string state = update + t + set + setv + where + cond + ";"
+	std::map<std::string, sql::SQLString> retMultipleColumns(
+		std::string cols, 
+		std::string tab, 
+		std::string whereClause
+	);
 
 private:
+	// Private constructor for Singleton
+	databasemanager();
+	~databasemanager();
+	
+	void ensureConnection();
+	
 	std::string statement;
-	/*std::string userinfo; // tables for easier sql queries
-	std::string accountinfo;
-	std::string investmentinfo;
-	std::string transactioninfo;*/
-	sql::Statement* stmt;        // Added missing member
-	sql::Connection* connection; // Added missing member
-// values for easier sql queries
-	std::string insert = "INSERT INTO ";
-	std::string ctable = "Create table ";
-	std::string values = "VALUES ";
-	std::string update =  "UPDATE ";
-	std::string set = "SET ";
-	std::string select = "SELECT ";
-	std::string from = "FROM ";
-	std::string where = "WHERE ";
+	sql::Statement* stmt;
+	sql::Connection* connection;
+	sql::mysql::MySQL_Driver* driver;
+
+	// Connection details
+	const std::string host = "tcp://136.114.146.175:3306";
+	const std::string user = "client";
+	const std::string password = "gsbsTeam20$";
+	const std::string schema = "bankdatabase";
+
+	// SQL keywords for easier queries
+	const std::string insert = "INSERT INTO ";
+	const std::string ctable = "CREATE TABLE ";
+	const std::string values = "VALUES ";
+	const std::string update = "UPDATE ";
+	const std::string set = "SET ";
+	const std::string select = "SELECT ";
+	const std::string from = "FROM ";
+	const std::string where = "WHERE ";
 };
+
+#endif // DATABASEMANAGER_H

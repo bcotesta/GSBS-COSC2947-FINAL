@@ -8,220 +8,237 @@
 #include <jdbc/cppconn/statement.h>
 #include <string>
 #include <iostream>
+#include <sstream>
 
-databasemanager::databasemanager()
-{
-    
-   /* sql::mysql::MySQL_Driver* driver;
-    sql::Connection* con;
-
-    try {
-        driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
-        con->setSchema("bankdatabase");
-        sql::Statement* stmt = con->createStatement();
-    }
-    catch (sql::SQLException& e) {
-        std::cerr << "SQL Error: " << e.what() << std::endl;
-    } */
+// Singleton instance getter
+databasemanager& databasemanager::getInstance() {
+	static databasemanager instance;
+	return instance;
 }
 
-
-//accn = account number, accT = account type
-void databasemanager::createAccount(std::string accN, std::string accT)
+databasemanager::databasemanager() 
+    : stmt(nullptr), connection(nullptr), driver(nullptr)
 {
-    sql::mysql::MySQL_Driver* driver;
-    sql::Connection* con;
-
-    std::string host = "tcp://localhost:3306";
-
     try {
         driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://136.114.146.175:3306", "client", "gsbsTeam20$");
-        con->setSchema("bankdatabase");
-        cout << "connected";
+        connection = driver->connect(host, user, password);
+        connection->setSchema(schema);
+        stmt = connection->createStatement();
+        
+        // Ensure UTF-8 encoding for all database operations
+        stmt->execute("SET NAMES 'utf8mb4'");
+        stmt->execute("SET CHARACTER SET utf8mb4");
+        
+        std::cout << "Database connected successfully" << std::endl;
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error in constructor: " << e.what() << std::endl;
+        // Clean up on error
+        if (stmt) {
+            delete stmt;
+            stmt = nullptr;
+        }
+        if (connection) {
+            delete connection;
+            connection = nullptr;
+        }
+    }
+}
 
-        sql::Statement* stmt = con->createStatement();
+void databasemanager::ensureConnection()
+{
+    try {
+        if (!connection || connection->isClosed()) {
+            if (connection) {
+                delete connection;
+            }
+            if (stmt) {
+                delete stmt;
+            }
+            
+            driver = sql::mysql::get_driver_instance();
+            connection = driver->connect(host, user, password);
+            connection->setSchema(schema);
+            stmt = connection->createStatement();
+            std::cout << "Database reconnected" << std::endl;
+        }
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error in ensureConnection: " << e.what() << std::endl;
+        throw;
+    }
+}
 
-
-        std::string statement = "Create table if not exists account" + accN + "( accountId int not null, accountType VARCHAR(20) not NULL, Balance decimal(15,2) not null);";
-
+void databasemanager::createAccount(std::string accN, std::string accT)
+{
+    try {
+        ensureConnection();
+        
+        std::string statement = "CREATE TABLE IF NOT EXISTS account" + accN + 
+            "(accountId INT NOT NULL, accountType VARCHAR(20) NOT NULL, Balance DECIMAL(15,2) NOT NULL)";
+        
         stmt->execute(statement);
-        //std::string statement2 = insert + accN;
+        std::cout << "Account table created successfully" << std::endl;
+        
         std::string tvs = "('" + accN + "', '" + accT + "', 0.00)";
         addtoTable("account" + accN, tvs);
     }
     catch (sql::SQLException& e) {
-        std::cerr << "SQL Error: " << e.what() << std::endl;
+        std::cerr << "SQL Error in createAccount: " << e.what() << std::endl;
     }
-
-
 }
 
 void databasemanager::createTransactionTb(std::string accnID, std::string tID)
 {
-    sql::mysql::MySQL_Driver* driver;
-    sql::Connection* con;
     try {
-        driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://136.114.146.175:3306", "client", "gsbsTeam20$");
-        con->setSchema("bankdatabase");
-        cout << "connected";
-        sql::Statement* stmt = con->createStatement();
-
-
-        std::string statement = ctable + "Transaction " + tID + " (TransactionID int primary key, accountId INT not null, accounttype VARCHAR(20) not null, transactiontype VARCHAR(20) not null, amount decimal(15,2) not null, transactiondate DATETIME not null, description VARCHAR(255));";
+        ensureConnection();
+        
+        std::string statement = ctable + "Transaction" + tID + 
+            " (TransactionID INT PRIMARY KEY, accountId INT NOT NULL, " +
+            "accounttype VARCHAR(20) NOT NULL, transactiontype VARCHAR(20) NOT NULL, " +
+            "amount DECIMAL(15,2) NOT NULL, transactiondate DATETIME NOT NULL, " +
+            "description VARCHAR(255))";
+        
         stmt->execute(statement);
+        std::cout << "Transaction table created successfully" << std::endl;
     }
     catch (sql::SQLException& e) {
-        std::cerr << "SQL Error: " << e.what() << std::endl;
+        std::cerr << "SQL Error in createTransactionTb: " << e.what() << std::endl;
     }
-
 }
 
 void databasemanager::addtoTable(std::string tab, std::string val)
 {
-    sql::mysql::MySQL_Driver* driver;
-    sql::Connection* con;
- 
-
     try {
-        driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://136.114.146.175:3306", "client", "gsbsTeam20$");
-        con->setSchema("bankdatabase");
-
-        cout << "connected";
-        sql::Statement* stmt = con->createStatement();
-
-        std::string statement = insert + tab + " " + values + val;
-        //create statement to execute
-
-        stmt->execute(statement);
-        //execute query - use execute() for INSERT statements
+        ensureConnection();
         
+        std::string statement = insert + tab + " " + values + val;
+        stmt->execute(statement);
+        std::cout << "Data added to table successfully" << std::endl;
     }
     catch (sql::SQLException& e) {
-        std::cerr << "SQL Error: " << e.what() << std::endl;
+        std::cerr << "SQL Error in addtoTable: " << e.what() << std::endl;
     }
 }
 
-
-//col= columns being selected, tab = table selected, specval = specfic value(column from search you want)
 sql::SQLString databasemanager::retString(std::string col, std::string tab, std::string specval)
 {
-    sql::SQLString tempstring; 
-    //string that will be returned;
-  
-    sql::mysql::MySQL_Driver* driver;
-    sql::Connection* con;
-
+    sql::SQLString tempstring;
+    sql::ResultSet* res = nullptr;
+    
     try {
-        driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://136.114.146.175:3306", "client", "gsbsTeam20$");
-        con->setSchema("bankdatabase");
-
-
-        cout << "connected";
-        sql::Statement* stmt = con->createStatement();
-
-
+        ensureConnection();
+        
         statement = select + col + " " + from + tab;
-        //uses the statement variable to make a string statement for execution
-
-        sql::ResultSet* res = stmt->executeQuery(statement);
-        //executes the statement assigns value to res (result set)
-
-        while (res->next()) {
+        res = stmt->executeQuery(statement);
+        
+        if (res && res->next()) {
             tempstring = res->getString(specval);
-            //searches returned statement for the specific value wanted.
         }
-
-        //delete res;  //clean up result set only
-        // Don't delete stmt - it's a class member
-        return tempstring;
-
-
     }
     catch (sql::SQLException& e) {
-        std::cerr << "SQL Error: " << e.what() << std::endl;
+        std::cerr << "SQL Error in retString: " << e.what() << std::endl;
     }
+    
+    if (res) {
+        delete res;
+    }
+    
     return tempstring;
- 
 }
-
 
 sql::SQLString databasemanager::retStringW(std::string col, std::string tab, std::string val, std::string specval)
-{ //select statement with where 
-    std::string tempstring; 
-
-    sql::mysql::MySQL_Driver* driver;
-    sql::Connection* con;
-
+{
+    sql::SQLString tempstring;
+    sql::ResultSet* res = nullptr;
+    
     try {
-        driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://127.0.0.1:3306", "root", "keypick1");
-        con->setSchema("bankdatabase");
-        sql::Statement* stmt = con->createStatement();
-
-
-        //same comments and functions as retString
+        ensureConnection();
+        
         statement = select + col + " " + from + tab + " " + where + val;
-        //except here it uses the WHERE statement to give a more specific search
-
-        sql::ResultSet* res = stmt->executeQuery(statement);
-        //select statement to retrieve data for database
-        if (res->next()) {
+        res = stmt->executeQuery(statement);
+        
+        if (res && res->next()) {
             tempstring = res->getString(specval);
         }
-
-       
-        delete res;  //clean up result set only
-        // Don't delete stmt - it's a class member
-
     }
     catch (sql::SQLException& e) {
-        std::cerr << "SQL Error: " << e.what() << std::endl;
+        std::cerr << "SQL Error in retStringW: " << e.what() << std::endl;
     }
-  
+    
+    if (res) {
+        delete res;
+    }
+    
     return tempstring;
 }
 
-// tab = table, setv = set values, cond = condition
 void databasemanager::updateTable(std::string tab, std::string setv, std::string cond)
 {
-    sql::mysql::MySQL_Driver* driver;
-    sql::Connection* con;
-
     try {
-        driver = sql::mysql::get_driver_instance();
-        con = driver->connect("tcp://136.114.146.175:3306", "client", "gsbsTeam20$");
-        con->setSchema("bankdatabase");
-        cout << "connected";
-        sql::Statement* stmt = con->createStatement();
-
+        ensureConnection();
+        
         statement = update + tab + " " + set + setv + " " + where + cond;
-        //create statement for execution with UPDATE, SET, and WHERE
-        //example UPDATE userinfo SET email = 'testemail' name = 'testname' WHERE userID = 1;
-        //will update values for userID 1
-
         stmt->execute(statement);
-        //Executes statement - use execute() for UPDATE statements
-        //no return needed
+        std::cout << "Table updated successfully" << std::endl;
     }
     catch (sql::SQLException& e) {
-        std::cerr << "SQL Error: " << e.what() << std::endl;
+        std::cerr << "SQL Error in updateTable: " << e.what() << std::endl;
     }
+}
+
+std::map<std::string, sql::SQLString> databasemanager::retMultipleColumns(
+    std::string cols, 
+    std::string tab, 
+    std::string whereClause)
+{
+    std::map<std::string, sql::SQLString> results;
+    sql::ResultSet* res = nullptr;
+    
+    try {
+        ensureConnection();
+        
+        statement = select + cols + " " + from + tab + " " + where + whereClause;
+        res = stmt->executeQuery(statement);
+        
+        if (res && res->next()) {
+            // Parse the column names from the cols string
+            std::istringstream ss(cols);
+            std::string colName;
+            
+            while (std::getline(ss, colName, ',')) {
+                // Trim whitespace
+                colName.erase(0, colName.find_first_not_of(" \t"));
+                colName.erase(colName.find_last_not_of(" \t") + 1);
+                
+                try {
+                    results[colName] = res->getString(colName);
+                } catch (sql::SQLException& e) {
+                    std::cerr << "Error getting column '" << colName << "': " << e.what() << std::endl;
+                }
+            }
+        }
+    }
+    catch (sql::SQLException& e) {
+        std::cerr << "SQL Error in retMultipleColumns: " << e.what() << std::endl;
+    }
+    
+    if (res) {
+        delete res;
+    }
+    
+    return results;
 }
 
 databasemanager::~databasemanager()
 {
-  if (stmt) {
+    if (stmt) {
         delete stmt;
         stmt = nullptr;
     }
     if (connection) {
         delete connection;
         connection = nullptr;
-    } 
-} 
+    }
+}
 
